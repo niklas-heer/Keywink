@@ -14,16 +14,16 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>CFBundleURLName</key>
-			<string>com.brnbw.LeaderKey</string>
+			<string>de.niklas-heer.Keywink</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>leaderkey</string>
+				<string>keywink</string>
 			</array>
 		</dict>
 	</array>
 	<key>SUFeedURL</key>
-	<string>https://mikker.github.io/LeaderKey.app/appcast.xml</string>
+	<string>$(KEYWINK_UPDATE_FEED_URL)</string>
 	<key>SUPublicEDKey</key>
-	<string>4ZfPYKvzE7b/uYW4B8f2v++7Bry/OmvYHCzl3g936KE=</string>
+	<string>$(KEYWINK_UPDATE_PUBLIC_KEY)</string>
 </dict>
 </plist>

@@ -5,6 +5,21 @@ import Defaults
 
 let emptyRoot = Group(key: "🚫", label: "Config error", actions: [])
 
+enum ConfigImportError: LocalizedError {
+  case sourceMatchesDestination
+  case validationFailed([ValidationError])
+
+  var errorDescription: String? {
+    switch self {
+    case .sourceMatchesDestination:
+      return "Choose a config file other than Keywink's current config.json."
+    case .validationFailed(let errors):
+      let details = errors.prefix(3).map(\.message).joined(separator: "\n")
+      return "The selected config contains invalid shortcuts.\n\(details)"
+    }
+  }
+}
+
 class UserConfig: ObservableObject {
   @Published var root = emptyRoot {
     didSet {
@@ -27,6 +42,7 @@ class UserConfig: ObservableObject {
   private var isLoading = false
   private let configIOQueue = DispatchQueue(label: "ConfigIO", qos: .userInitiated)
   private var saveWorkItem: DispatchWorkItem?
+  private var ioRevision: UInt = 0
 
   init(
     alertHandler: AlertHandler = DefaultAlertHandler(),
@@ -52,8 +68,54 @@ class UserConfig: ObservableObject {
 
   func reloadFromFile() {
     Events.send(.willReload)
-    loadConfig(suppressAlerts: true)
-    Events.send(.didReload)
+    loadConfig(suppressAlerts: true, sendReloadEvent: true)
+  }
+
+  @discardableResult
+  func importConfig(from sourceURL: URL) throws -> URL? {
+    let sourceURL = sourceURL.standardizedFileURL.resolvingSymlinksInPath()
+    let destinationURL = url.standardizedFileURL.resolvingSymlinksInPath()
+
+    guard try !referencesSameFile(sourceURL, destinationURL) else {
+      throw ConfigImportError.sourceMatchesDestination
+    }
+
+    let data = try Data(contentsOf: sourceURL)
+    let importedRoot = try JSONDecoder().decode(Group.self, from: data)
+    let errors = ConfigValidator.validate(group: importedRoot)
+    guard errors.isEmpty else {
+      throw ConfigImportError.validationFailed(errors)
+    }
+
+    invalidatePendingIO()
+    Events.send(.willReload)
+    isLoading = true
+    defer {
+      isLoading = false
+      Events.send(.didReload)
+    }
+
+    var backupURL: URL?
+    try configIOQueue.sync {
+      let destinationDirectory = destinationURL.deletingLastPathComponent()
+      try fileManager.createDirectory(
+        at: destinationDirectory, withIntermediateDirectories: true)
+
+      if fileManager.fileExists(atPath: destinationURL.path) {
+        let candidate = destinationDirectory.appendingPathComponent(
+          "\(destinationURL.lastPathComponent).backup-\(UUID().uuidString)")
+        try fileManager.copyItem(at: destinationURL, to: candidate)
+        backupURL = candidate
+      }
+
+      try data.write(to: destinationURL, options: .atomic)
+    }
+
+    root = importedRoot
+    lastReadChecksum = calculateChecksum(data)
+    setValidationErrors([])
+
+    return backupURL
   }
 
   func saveConfig() {
@@ -105,6 +167,7 @@ class UserConfig: ObservableObject {
 
     // Create a new debounced save work item
     let currentRoot = root
+    let revision = ioRevision
     let workItem = DispatchWorkItem { [weak self] in
       guard let self = self else { return }
 
@@ -120,6 +183,7 @@ class UserConfig: ObservableObject {
           let currentChecksum = self.getCurrentFileChecksum()
           if currentChecksum != lastChecksum {
             DispatchQueue.main.async {
+              guard self.ioRevision == revision else { return }
               let result = self.alertHandler.showAlert(
                 style: .warning,
                 message: "Configuration file changed on disk",
@@ -139,17 +203,21 @@ class UserConfig: ObservableObject {
               }
 
               // Continue with save after conflict resolution
-              self.performSaveWithData(jsonData, currentRoot: currentRoot)
+              self.performSaveWithData(
+                jsonData, currentRoot: currentRoot, revision: revision)
             }
             return
           }
         }
 
         DispatchQueue.main.async {
-          self.performSaveWithData(jsonData, currentRoot: currentRoot)
+          guard self.ioRevision == revision else { return }
+          self.performSaveWithData(
+            jsonData, currentRoot: currentRoot, revision: revision)
         }
       } catch {
         DispatchQueue.main.async {
+          guard self.ioRevision == revision else { return }
           self.handleError(error, critical: true)
         }
       }
@@ -161,7 +229,11 @@ class UserConfig: ObservableObject {
     configIOQueue.asyncAfter(deadline: .now() + .milliseconds(300), execute: workItem)
   }
 
-  private func performSaveWithData(_ jsonData: Data, currentRoot: Group) {
+  private func performSaveWithData(
+    _ jsonData: Data, currentRoot: Group, revision: UInt
+  ) {
+    guard ioRevision == revision else { return }
+
     // Validation on main queue
     let validationErrors = ConfigValidator.validate(group: currentRoot)
     setValidationErrors(validationErrors)
@@ -174,11 +246,13 @@ class UserConfig: ObservableObject {
         try self.writeFile(data: jsonData)
 
         DispatchQueue.main.async {
+          guard self.ioRevision == revision else { return }
           // Update checksum on main queue using data directly
           self.lastReadChecksum = self.calculateChecksum(jsonData)
         }
       } catch {
         DispatchQueue.main.async {
+          guard self.ioRevision == revision else { return }
           self.handleError(error, critical: true)
         }
       }
@@ -201,7 +275,7 @@ class UserConfig: ObservableObject {
     let appSupportDir = FileManager.default.urls(
       for: .applicationSupportDirectory, in: .userDomainMask)[0]
     let path = (appSupportDir.path as NSString).appendingPathComponent(
-      "Leader Key")
+      "Keywink")
     do {
       try FileManager.default.createDirectory(
         atPath: path, withIntermediateDirectories: true)
@@ -264,6 +338,23 @@ class UserConfig: ObservableObject {
     try data.write(to: url, options: .atomic)
   }
 
+  private func referencesSameFile(_ firstURL: URL, _ secondURL: URL) throws -> Bool {
+    if firstURL == secondURL {
+      return true
+    }
+
+    guard fileManager.fileExists(atPath: secondURL.path) else {
+      return false
+    }
+
+    let firstAttributes = try fileManager.attributesOfItem(atPath: firstURL.path)
+    let secondAttributes = try fileManager.attributesOfItem(atPath: secondURL.path)
+    return firstAttributes[.systemNumber] as? NSNumber
+      == secondAttributes[.systemNumber] as? NSNumber
+      && firstAttributes[.systemFileNumber] as? NSNumber
+        == secondAttributes[.systemFileNumber] as? NSNumber
+  }
+
   private func readFile() throws -> String {
     try String(contentsOfFile: path, encoding: .utf8)
   }
@@ -303,13 +394,20 @@ class UserConfig: ObservableObject {
 
   // MARK: - Config Loading
 
-  private func loadConfig(suppressAlerts: Bool = false) {
+  private func loadConfig(
+    suppressAlerts: Bool = false, sendReloadEvent: Bool = false
+  ) {
+    invalidatePendingIO()
+    let revision = ioRevision
     isLoading = true
 
     guard exists else {
       root = emptyRoot
       validationErrors = []
       isLoading = false
+      if sendReloadEvent {
+        Events.send(.didReload)
+      }
       return
     }
 
@@ -335,19 +433,32 @@ class UserConfig: ObservableObject {
         let validationErrors = ConfigValidator.validate(group: decodedRoot)
 
         DispatchQueue.main.async {
+          guard self.ioRevision == revision else { return }
           self.root = decodedRoot
           self.lastReadChecksum = checksum
           self.setValidationErrors(validationErrors)
           self.isLoading = false
-
+          if sendReloadEvent {
+            Events.send(.didReload)
+          }
         }
       } catch {
         DispatchQueue.main.async {
+          guard self.ioRevision == revision else { return }
           self.handleError(error, critical: false)
           self.isLoading = false
+          if sendReloadEvent {
+            Events.send(.didReload)
+          }
         }
       }
     }
+  }
+
+  private func invalidatePendingIO() {
+    ioRevision &+= 1
+    saveWorkItem?.cancel()
+    saveWorkItem = nil
   }
 
   // MARK: - Validation

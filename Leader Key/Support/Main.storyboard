@@ -11,11 +11,11 @@
                 <application id="YWy-cA-2k4" sceneMemberID="viewController">
                     <menu key="mainMenu" title="Main Menu" systemMenu="main" id="gBL-Jm-Yz0">
                         <items>
-                            <menuItem title="Leader Key" id="Pp0-iJ-FT8">
+                            <menuItem title="Keywink" id="Pp0-iJ-FT8">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="Leader Key" systemMenu="apple" id="eiP-IZ-PJD">
+                                <menu key="submenu" title="Keywink" systemMenu="apple" id="eiP-IZ-PJD">
                                     <items>
-                                        <menuItem title="About Leader Key" id="Tid-6l-4eG">
+                                        <menuItem title="About Keywink" id="Tid-6l-4eG">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="orderFrontStandardAboutPanel:" target="YWy-cA-2k4" id="Tid-6l-4eH"/>
@@ -39,7 +39,7 @@
                                             <menu key="submenu" title="Services" systemMenu="services" id="OP0-g7-3lk"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="uko-uD-Iri"/>
-                                        <menuItem title="Quit Leader Key" keyEquivalent="q" id="5Zu-hg-25U"/>
+                                        <menuItem title="Quit Keywink" keyEquivalent="q" id="5Zu-hg-25U"/>
                                     </items>
                                 </menu>
                             </menuItem>
@@ -374,7 +374,7 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Help" systemMenu="help" id="61v-5K-iEN">
                                     <items>
-                                        <menuItem title="Leader Key Help" keyEquivalent="?" id="W1e-Yf-slp"/>
+                                        <menuItem title="Keywink Help" keyEquivalent="?" id="W1e-Yf-slp"/>
                                     </items>
                                 </menu>
                             </menuItem>

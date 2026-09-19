@@ -5,10 +5,10 @@ class MainMenu: NSMenu {
     super.init(title: "MainMenu")
 
     let appMenu = NSMenuItem()
-    appMenu.submenu = NSMenu(title: "Leader Key")
+    appMenu.submenu = NSMenu(title: "Keywink")
     appMenu.submenu?.items = [
       NSMenuItem(
-        title: "About Leader Key",
+        title: "About Keywink",
         action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: ""),
       .separator(),
       NSMenuItem(
@@ -19,7 +19,7 @@ class MainMenu: NSMenu {
         title: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w"),
       .separator(),
       NSMenuItem(
-        title: "Quit Leader Key", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"
+        title: "Quit Keywink", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"
       ),
     ]
 

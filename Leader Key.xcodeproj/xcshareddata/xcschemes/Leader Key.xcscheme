@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "427C17E62BD311B400955B98"
-               BuildableName = "Leader Key.app"
+               BuildableName = "Keywink.app"
                BlueprintName = "Leader Key"
                ReferencedContainer = "container:Leader Key.xcodeproj">
             </BuildableReference>
@@ -63,7 +63,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "427C17E62BD311B400955B98"
-            BuildableName = "Leader Key.app"
+            BuildableName = "Keywink.app"
             BlueprintName = "Leader Key"
             ReferencedContainer = "container:Leader Key.xcodeproj">
          </BuildableReference>
@@ -80,7 +80,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "427C17E62BD311B400955B98"
-            BuildableName = "Leader Key.app"
+            BuildableName = "Keywink.app"
             BlueprintName = "Leader Key"
             ReferencedContainer = "container:Leader Key.xcodeproj">
          </BuildableReference>

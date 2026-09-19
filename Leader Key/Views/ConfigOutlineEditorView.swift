@@ -68,7 +68,7 @@ private class OutlineController: NSObject, NSOutlineViewDataSource, NSOutlineVie
   private var observers: [NSObjectProtocol] = []
   private var didApplyInitialExpansion = false
   private let expandedDefaultsKey = "ConfigOutlineEditor.ExpandedIndexPaths"
-  private let dragType = NSPasteboard.PasteboardType("com.leaderkey.node")
+  private let dragType = NSPasteboard.PasteboardType("de.niklas-heer.Keywink.node")
   private var lastRenderedRoot: Group?
   private var validationCancellable: AnyCancellable?
   /// Flags the next render call to skip a full reload because we already mutated `rootNode` locally.

@@ -4,19 +4,23 @@ This file provides guidance to coding agents when working with code in this repo
 
 # Keywink Development Guide
 
-Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [DECISIONS.md](DECISIONS.md) for the accepted identity and upstream baseline. The Xcode scheme and source paths still use Leader Key names. Release and app-identity migration are pending; the inherited release commands below are references, not a configured Keywink release process.
+Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [DECISIONS.md](DECISIONS.md) for the accepted identity and upstream baseline. The installed app is Keywink; the Xcode project, scheme, source paths, and Swift module retain Leader Key names. See [RELEASE.md](RELEASE.md) for the local release process and external signing prerequisites.
 
 ## Build & Test Commands
 
-- Build and run: `xcodebuild -scheme "Leader Key" -configuration Debug build`
-- Run all tests: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" test`
-- Run single test: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" '-only-testing:Leader KeyTests/UserConfigTests/testInitializesWithDefaults' test`
-- Bump version: `bin/bump`
-- Create release: `bin/release`
+- Build: `mise run build`
+- Run all tests: `mise run test`
+- Run required checks: `mise run check` (strict formatting, native tests, and script syntax)
+- Run single test: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" '-only-testing:Leader KeyTests/UserConfigTests/testInitializesWithDefaults' -derivedDataPath build CODE_SIGNING_ALLOWED=NO test`
+- Format source explicitly: `mise run format` (builds never rewrite source)
+- Set release version: `bin/bump <marketing-version> <build-number>`
+- Prepare signed, notarized artifacts: `mise run release` (requires the configuration in RELEASE.md; does not publish)
+
+Use the Xcode-provided Swift toolchain. CI stays on macOS because AppKit and Xcode cannot be tested in a Linux Dagger container.
 
 ## Architecture Overview
 
-Leader Key is a macOS application that provides customizable keyboard shortcuts. The core architecture consists of:
+Keywink is a macOS application that provides customizable keyboard shortcuts. The core architecture consists of:
 
 **Key Components:**
 
@@ -34,10 +38,12 @@ Leader Key is a macOS application that provides customizable keyboard shortcuts.
 
 **Configuration Flow:**
 
-- Config stored at `~/Library/Application Support/Leader Key/config.json`
-- `FileMonitor` watches for changes and triggers reload
+- Config stored at `~/Library/Application Support/Keywink/config.json`
+- Configuration changes save automatically; explicit reload and the settings import flow update the in-memory configuration
 - `ConfigValidator` ensures no key conflicts
 - Actions support: applications, URLs, commands, folders
+- Leader Key JSON import is explicit, validates before replacing, and preserves both the source and a backup of the Keywink configuration. Do not silently share upstream preferences or configuration.
+- Sparkle starts only with a configured HTTPS feed and valid public key; never restore upstream update infrastructure.
 
 **Testing Architecture:**
 

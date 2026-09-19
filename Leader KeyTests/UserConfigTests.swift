@@ -152,6 +152,138 @@ final class UserConfigTests: XCTestCase {
     XCTAssertEqual(testAlertManager.shownAlerts.count, 0)
   }
 
+  func testImportsValidConfigAndPreservesSourceAndBackup() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+
+    let originalDestinationData = try Data(contentsOf: subject.url)
+    let sourceURL = URL(fileURLWithPath: tempBaseDir)
+      .appendingPathComponent("Leader Key config.json")
+    let sourceData = configData(key: "x", value: "https://example.com/imported")
+    try sourceData.write(to: sourceURL)
+    let expectedRoot = try JSONDecoder().decode(Group.self, from: sourceData)
+
+    let backupURL = try XCTUnwrap(subject.importConfig(from: sourceURL))
+
+    XCTAssertEqual(try Data(contentsOf: sourceURL), sourceData)
+    XCTAssertEqual(try Data(contentsOf: subject.url), sourceData)
+    XCTAssertEqual(try Data(contentsOf: backupURL), originalDestinationData)
+    try assertSamePersistedConfig(subject.root, expectedRoot)
+    XCTAssertTrue(subject.validationErrors.isEmpty)
+  }
+
+  func testRejectsInvalidImportWithoutChangingDestination() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+
+    let originalDestinationData = try Data(contentsOf: subject.url)
+    let originalRoot = subject.root
+    let sourceURL = URL(fileURLWithPath: tempBaseDir)
+      .appendingPathComponent("invalid-config.json")
+    let sourceData = configData(keys: ["x", "x"])
+    try sourceData.write(to: sourceURL)
+
+    XCTAssertThrowsError(try subject.importConfig(from: sourceURL)) { error in
+      guard case ConfigImportError.validationFailed = error else {
+        return XCTFail("Expected validation failure, got \(error)")
+      }
+    }
+
+    XCTAssertEqual(try Data(contentsOf: sourceURL), sourceData)
+    XCTAssertEqual(try Data(contentsOf: subject.url), originalDestinationData)
+    XCTAssertEqual(subject.root, originalRoot)
+    XCTAssertTrue(try backupURLs().isEmpty)
+  }
+
+  func testRejectsImportFromDestinationFile() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+    let originalDestinationData = try Data(contentsOf: subject.url)
+
+    XCTAssertThrowsError(try subject.importConfig(from: subject.url)) { error in
+      guard case ConfigImportError.sourceMatchesDestination = error else {
+        return XCTFail("Expected same-file rejection, got \(error)")
+      }
+    }
+
+    XCTAssertEqual(try Data(contentsOf: subject.url), originalDestinationData)
+    XCTAssertTrue(try backupURLs().isEmpty)
+  }
+
+  func testRejectsImportFromDestinationSymlink() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+    let originalDestinationData = try Data(contentsOf: subject.url)
+    let symlinkURL = URL(fileURLWithPath: tempBaseDir)
+      .appendingPathComponent("current-config-link.json")
+    try FileManager.default.createSymbolicLink(
+      at: symlinkURL, withDestinationURL: subject.url)
+
+    XCTAssertThrowsError(try subject.importConfig(from: symlinkURL)) { error in
+      guard case ConfigImportError.sourceMatchesDestination = error else {
+        return XCTFail("Expected same-file rejection, got \(error)")
+      }
+    }
+
+    XCTAssertEqual(try Data(contentsOf: subject.url), originalDestinationData)
+    XCTAssertTrue(try backupURLs().isEmpty)
+  }
+
+  func testRejectsMalformedImportWithoutChangingDestination() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+    let originalDestinationData = try Data(contentsOf: subject.url)
+    let sourceURL = URL(fileURLWithPath: tempBaseDir)
+      .appendingPathComponent("malformed-config.json")
+    let malformedData = Data("{ malformed json }".utf8)
+    try malformedData.write(to: sourceURL)
+
+    XCTAssertThrowsError(try subject.importConfig(from: sourceURL))
+
+    XCTAssertEqual(try Data(contentsOf: sourceURL), malformedData)
+    XCTAssertEqual(try Data(contentsOf: subject.url), originalDestinationData)
+    XCTAssertTrue(try backupURLs().isEmpty)
+  }
+
+  func testImportCancelsQueuedAutosave() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+
+    let sourceURL = URL(fileURLWithPath: tempBaseDir)
+      .appendingPathComponent("import-after-edit.json")
+    let sourceData = configData(key: "i", value: "https://example.com/imported")
+    try sourceData.write(to: sourceURL)
+
+    subject.root = try JSONDecoder().decode(
+      Group.self,
+      from: configData(key: "q", value: "https://example.com/queued"))
+    try subject.importConfig(from: sourceURL)
+    waitForAsyncIO()
+
+    XCTAssertEqual(try Data(contentsOf: subject.url), sourceData)
+    XCTAssertEqual(try Data(contentsOf: sourceURL), sourceData)
+  }
+
+  func testImportSupersedesInFlightReload() throws {
+    subject.ensureAndLoad()
+    waitForConfigLoad()
+
+    let staleData = configData(key: "s", value: "https://example.com/stale")
+    try staleData.write(to: subject.url, options: .atomic)
+    subject.reloadFromFile()
+
+    let sourceURL = URL(fileURLWithPath: tempBaseDir)
+      .appendingPathComponent("import-after-reload.json")
+    let sourceData = configData(key: "n", value: "https://example.com/new")
+    try sourceData.write(to: sourceURL)
+    let expectedRoot = try JSONDecoder().decode(Group.self, from: sourceData)
+    try subject.importConfig(from: sourceURL)
+    waitForAsyncIO()
+
+    XCTAssertEqual(try Data(contentsOf: subject.url), sourceData)
+    try assertSamePersistedConfig(subject.root, expectedRoot)
+  }
+
   func testRuntimeEnvironmentDetectsEveryXCTestMarker() {
     XCTAssertTrue(
       RuntimeEnvironment.isRunningTests(
@@ -183,5 +315,40 @@ final class UserConfigTests: XCTestCase {
       expectation.fulfill()
     }
     self.wait(for: [expectation], timeout: 1.0)
+  }
+
+  private func waitForAsyncIO() {
+    let expectation = expectation(description: "asynchronous config I/O flush")
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+      expectation.fulfill()
+    }
+    wait(for: [expectation], timeout: 1.0)
+  }
+
+  private func configData(key: String, value: String) -> Data {
+    configData(keys: [key], value: value)
+  }
+
+  private func configData(keys: [String], value: String = "https://example.com") -> Data {
+    let actions = keys.map {
+      "{ \"key\": \"\($0)\", \"type\": \"url\", \"value\": \"\(value)\" }"
+    }.joined(separator: ",")
+    return Data("{ \"type\": \"group\", \"actions\": [\(actions)] }".utf8)
+  }
+
+  private func backupURLs() throws -> [URL] {
+    try FileManager.default.contentsOfDirectory(
+      at: subject.url.deletingLastPathComponent(),
+      includingPropertiesForKeys: nil
+    ).filter { $0.lastPathComponent.hasPrefix("config.json.backup-") }
+  }
+
+  private func assertSamePersistedConfig(
+    _ first: Group, _ second: Group, file: StaticString = #filePath, line: UInt = #line
+  ) throws {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    XCTAssertEqual(
+      try encoder.encode(first), try encoder.encode(second), file: file, line: line)
   }
 }

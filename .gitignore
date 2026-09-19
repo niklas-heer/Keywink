@@ -1,4 +1,5 @@
-Updates/*
 *xcuserdata*
 default.profraw
 build/
+.DS_Store
+buildServer.json

@@ -80,7 +80,7 @@
 		4254953F2D75EFAD0020300E /* ForTheHorde.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForTheHorde.swift; sourceTree = "<group>"; };
 		426E625A2D2E6A98009FD2F2 /* CommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRunner.swift; sourceTree = "<group>"; };
 		4279AFEA2C6A08B100952A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "Leader Key/Support/Info.plist"; sourceTree = SOURCE_ROOT; };
-		427C17E72BD311B400955B98 /* Leader Key.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Leader Key.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		427C17E72BD311B400955B98 /* Keywink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Keywink.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		427C17EE2BD311B500955B98 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		427C17F12BD311B500955B98 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		427C17F32BD311B500955B98 /* Leader_Key.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Leader_Key.entitlements; sourceTree = "<group>"; };
@@ -175,7 +175,7 @@
 		427C17E82BD311B400955B98 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				427C17E72BD311B400955B98 /* Leader Key.app */,
+				427C17E72BD311B400955B98 /* Keywink.app */,
 				427C17F82BD311B500955B98 /* Leader KeyTests.xctest */,
 			);
 			name = Products;
@@ -290,8 +290,8 @@
 				115AA5C12DA546D500C17E18 /* SymbolPicker */,
 				FBCA04D82D9F02F700271163 /* Kingfisher */,
 			);
-			productName = "Leader Key";
-			productReference = 427C17E72BD311B400955B98 /* Leader Key.app */;
+			productName = Keywink;
+			productReference = 427C17E72BD311B400955B98 /* Keywink.app */;
 			productType = "com.apple.product-type.application";
 		};
 		427C17F72BD311B500955B98 /* Leader KeyTests */ = {
@@ -479,7 +479,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = DDB8SQMXS9;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -545,7 +545,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = DDB8SQMXS9;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -574,17 +574,17 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Leader Key/Leader_Key.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 155;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Leader Key/Support/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Leader Key/Support/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Leader Key";
+				INFOPLIST_KEY_CFBundleDisplayName = Keywink;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -595,9 +595,12 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.17.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.brnbw.Leader-Key";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.niklas-heer.Keywink";
+				PRODUCT_NAME = Keywink;
+				PRODUCT_MODULE_NAME = Leader_Key;
+				KEYWINK_UPDATE_FEED_URL = "";
+				KEYWINK_UPDATE_PUBLIC_KEY = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -610,17 +613,17 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Leader Key/Leader_Key.entitlements";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 155;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"Leader Key/Support/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Leader Key/Support/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "Leader Key";
+				INFOPLIST_KEY_CFBundleDisplayName = Keywink;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -631,9 +634,12 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.17.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.brnbw.Leader-Key";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "de.niklas-heer.Keywink";
+				PRODUCT_NAME = Keywink;
+				PRODUCT_MODULE_NAME = Leader_Key;
+				KEYWINK_UPDATE_FEED_URL = "";
+				KEYWINK_UPDATE_PUBLIC_KEY = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -643,17 +649,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 155;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.brnbw.Leader-KeyTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "de.niklas-heer.KeywinkTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Leader Key.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Leader Key";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Keywink.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Keywink";
 			};
 			name = Debug;
 		};
@@ -661,17 +667,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 155;
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.brnbw.Leader-KeyTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "de.niklas-heer.KeywinkTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Leader Key.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Leader Key";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Keywink.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Keywink";
 			};
 			name = Release;
 		};

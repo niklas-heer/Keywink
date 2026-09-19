@@ -1,11 +1,48 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-BUILD=$(git rev-list "$(git rev-parse --abbrev-ref HEAD)" | wc -l | awk '{ print $1 }')
-BUILD="$((BUILD + 0))"
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$repo_root"
 
-echo "${BUILD}"
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 <marketing-version> <build-number>" >&2
+  echo "Example: $0 0.1.1 2" >&2
+  exit 64
+fi
 
-agvtool new-version -all ${BUILD}
+marketing_version=$1
+build_number=$2
 
-echo "Resolving package dependencies"
-xcodebuild -resolvePackageDependencies
+if [[ ! $marketing_version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  echo "Marketing version must look like 0.1.0" >&2
+  exit 64
+fi
+
+if [[ ! $build_number =~ ^[1-9][0-9]*$ ]]; then
+  echo "Build number must be a positive integer" >&2
+  exit 64
+fi
+
+project_file="Leader Key.xcodeproj/project.pbxproj"
+marketing_version_count=$(/usr/bin/grep -Ec 'MARKETING_VERSION = [0-9]+\.[0-9]+\.[0-9]+;' "$project_file" || true)
+build_number_count=$(/usr/bin/grep -Ec 'CURRENT_PROJECT_VERSION = [0-9]+;' "$project_file" || true)
+
+if [[ $marketing_version_count -eq 0 || $build_number_count -eq 0 ]]; then
+  echo "Could not find version settings in $project_file" >&2
+  exit 65
+fi
+
+/usr/bin/sed -i '' -E \
+  -e "s/(MARKETING_VERSION = )[0-9]+\.[0-9]+\.[0-9]+;/\\1$marketing_version;/g" \
+  -e "s/(CURRENT_PROJECT_VERSION = )[0-9]+;/\\1$build_number;/g" \
+  "$project_file"
+
+updated_marketing_version_count=$(/usr/bin/grep -Ec "MARKETING_VERSION = $marketing_version;" "$project_file" || true)
+updated_build_number_count=$(/usr/bin/grep -Ec "CURRENT_PROJECT_VERSION = $build_number;" "$project_file" || true)
+
+if [[ $updated_marketing_version_count -ne $marketing_version_count || $updated_build_number_count -ne $build_number_count ]]; then
+  echo "Version settings were not updated consistently in $project_file" >&2
+  exit 65
+fi
+
+echo "Set Keywink version to $marketing_version ($build_number)"

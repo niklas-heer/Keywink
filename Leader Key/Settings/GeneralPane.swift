@@ -3,6 +3,7 @@ import KeyboardShortcuts
 import LaunchAtLogin
 import Settings
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct GeneralPane: View {
   private let contentWidth = 720.0
@@ -82,6 +83,8 @@ struct GeneralPane: View {
               }
             }
           }
+
+          Button("Import Leader Key config…", action: importLeaderKeyConfig)
         }
       }
 
@@ -100,6 +103,38 @@ struct GeneralPane: View {
       Settings.Section(title: "App") {
         LaunchAtLogin.Toggle()
       }
+    }
+  }
+
+  private func importLeaderKeyConfig() {
+    let panel = NSOpenPanel()
+    panel.title = "Import Leader Key configuration"
+    panel.allowedContentTypes = [.json]
+    panel.allowsMultipleSelection = false
+    panel.canChooseDirectories = false
+    panel.directoryURL = FileManager.default.urls(
+      for: .applicationSupportDirectory, in: .userDomainMask
+    ).first?.appendingPathComponent("Leader Key", isDirectory: true)
+    guard panel.runModal() == .OK, let source = panel.url else { return }
+
+    let confirmation = NSAlert()
+    confirmation.messageText = "Replace Keywink's configuration?"
+    confirmation.informativeText =
+      "The selected configuration will be copied to Keywink. Your current configuration will be backed up beside config.json. The original file will remain unchanged. Shortcuts and app preferences are not imported."
+    confirmation.addButton(withTitle: "Import")
+    confirmation.addButton(withTitle: "Cancel")
+    guard confirmation.runModal() == .alertFirstButtonReturn else { return }
+
+    do {
+      let backupURL = try config.importConfig(from: source)
+      let result = NSAlert()
+      result.messageText = "Configuration imported"
+      result.informativeText =
+        backupURL.map { "Previous configuration saved at \($0.path)." }
+        ?? "Keywink is ready to use the imported configuration."
+      result.runModal()
+    } catch {
+      NSAlert(error: error).runModal()
     }
   }
 }

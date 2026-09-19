@@ -4,168 +4,62 @@ A native macOS command launcher with memorable key sequences, visual hints, and 
 
 Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderKey), created by Mikkel Malmberg and its contributors. Their history and [MIT license](LICENSE) are preserved.
 
-## Fork status
+## Status
 
-This is the initial source fork. There is no Keywink release yet. The Xcode project, app identity, configuration location, URL scheme, signing settings, and update infrastructure still use the inherited Leader Key setup. The download and Homebrew instructions in the upstream documentation below install **Leader Key**, not Keywink.
+Keywink has its own application identity and local build/release preparation. There is no published Keywink release yet. Builds use the `Keywink.app` name, `de.niklas-heer.Keywink` bundle identifier, and `keywink://` URL scheme. Leader Key can remain installed alongside it.
 
-Proposed first milestone:
+The Xcode project, target, scheme, and Swift module retain their inherited names to keep this migration small. These internal names do not determine the installed app's identity.
 
-1. Isolate configuration tests from real user files and establish a reproducible build/test baseline.
-2. Give Keywink its own app identity and release/update configuration, with an explicit import path for existing Leader Key settings.
-3. Review upstream fixes and editor/overlay improvements against a focused command-launcher scope.
+## Development
 
-See [development guidance](AGENTS.md) for inherited commands and the known test-isolation issue, and [decisions](DECISIONS.md) for the fork baseline. Track Keywink work in [this repository's issues](https://github.com/niklas-heer/Keywink/issues).
-
-## Upstream documentation
-
-The following is inherited Leader Key documentation, including the original author's announcement and installation links.
-
-### Upstream announcement: Leader Key has been surpassed by [Tuna](https://tunaformac.com)
-
-Tuna is a complete launcher – much more capable, and with **Leader Key built in!**
-
-[![Meet Tuna](https://img.youtube.com/vi/vkm-ZFlivyI/mqdefault.jpg)](https://www.youtube.com/watch?v=vkm-ZFlivyI)
-
-[Leader Key will stay free and open source](https://github.com/mikker/LeaderKey/discussions/314#discussioncomment-15939059) but my focus will be on Tuna going forward. 
-
----
-  
-<img src="https://s3.brnbw.com/icon_1024-akc2Ij3q9JOyhQ6Y7Lz6AFkX6nQQFhrQaRPqbV4vor0A62EA0vq4xOGrXpg6PVKi3aUJxOAyItkyktblPtZD4K4oYZ1bJVdh96VE.png" width="256" height="256" alt="Leader Key.app" />
-
-**The \*faster than your launcher\* launcher**
-
-A riff on [Raycast](https://www.raycast.com), [@mxstbr's multi-key Karabiner setup](https://www.youtube.com/watch?v=m5MDv9qwhU8&t=540s), and Vim's `<leader>` key.
-
-Watch the intro video on YouTube:
-
-<div>
-<a href="https://www.youtube.com/watch?v=EQYakLsYSAQ"><img src="https://img.youtube.com/vi/EQYakLsYSAQ/maxresdefault.jpg" width=480></a>
-<a href="https://www.youtube.com/watch?v=hzzQl5FOL-k"><img src="https://img.youtube.com/vi/hzzQl5FOL-k/maxresdefault.jpg" width=480></a>
-</div>
-
-*Yes, I only have that one thumbnail face.*
-
-## Install
-
-**Download**
-
-📦 [Download latest version](https://github.com/mikker/LeaderKey.app/releases)
-or
-
-**Homebrew**
+Install Xcode with the macOS SDK, complete its first-launch setup, and install [mise](https://mise.jdx.dev/). Xcode provides Swift and the formatter; Swift Package Manager dependencies are locked in the project. No Homebrew packages are required to build.
 
 ```sh
-$ brew install leader-key
+mise trust
+mise run build
+mise run test
 ```
 
-### Post-Install setup
-- Open the settings menu with the menu bar icon <img width="17" alt="Screenshot 2025-05-21 at 1 58 46 PM" src="https://github.com/user-attachments/assets/7ba2cd99-dbd1-4b23-a35b-c5579e797321" />
-- Choose your [`leader`](#what-do-i-set-as-my-leader-key) (`Shortcut` that will open the app) 
+Tests use temporary configuration directories and an isolated preferences domain. `mise run format` explicitly formats source; builds do not rewrite files. See [AGENTS.md](AGENTS.md) for development guidance and [RELEASE.md](RELEASE.md) for signing, notarization, packaging, and update setup.
 
-  <img width="213" alt="Screenshot 2025-05-21 at 2 01 56 PM" src="https://github.com/user-attachments/assets/5e486a9a-ee1c-4ac7-a2d9-f4d0a46eb734" />
-- Add your [shortcuts](#example-shortcuts) to the `Config` settings
+## Configure
 
-## Why Leader Key?
+Open Keywink's menu bar item, choose **Settings…**, and record the shortcut that opens the launcher. Add actions or groups in the configuration editor. Then press your shortcut followed by the keys in a sequence: for example, `o`, then `m` to open Messages.
 
-### Problems with traditional launchers:
+Keywink stores `config.json` in `~/Library/Application Support/Keywink/`. Preferences, shortcuts, and launch-at-login registration belong to Keywink's bundle identity. Choose a different configuration directory in Advanced settings if needed.
 
-1. Typing the name of the thing can be slow and give unpredictable results.
-2. Global shortcuts have limited combinations.
-3. Leader Key offers predictable, nested shortcuts -- like combos in a fighting game.
+### Import from Leader Key
 
-### Example Shortcuts:
+In **Settings → General**, choose **Import Leader Key config…** and select the existing `config.json` (normally under `~/Library/Application Support/Leader Key/`). Review the replacement confirmation. Keywink validates the file, preserves a backup of its current configuration, and copies the selected configuration into its own directory. The original file remains unchanged.
 
-- <kbd>leader</kbd><kbd>o</kbd><kbd>m</kbd> → Launch Messages (`open messages`)
-- <kbd>leader</kbd><kbd>m</kbd><kbd>m</kbd> → Mute audio (`media mute`)
-- <kbd>leader</kbd><kbd>w</kbd><kbd>m</kbd> → Maximize current window (`window maximize`)
+Only the JSON configuration is imported. Record your activation shortcut and select other preferences in Keywink. Update any `leaderkey://` automation URLs to `keywink://`. Avoid assigning both running apps the same global shortcut.
 
-## URL Scheme
+## Automation
 
-Leader Key supports URL scheme automation for integration with tools like Alfred, Raycast, shell scripts, and more.
-
-### Available URL Schemes
-
-#### Configuration Management
-```bash
-# Reload configuration from disk
-open "leaderkey://config-reload"
-
-# Show config.json in Finder
-open "leaderkey://config-reveal"
+```sh
+open 'keywink://activate'
+open 'keywink://hide'
+open 'keywink://reset'
+open 'keywink://settings'
+open 'keywink://about'
+open 'keywink://config-reload'
+open 'keywink://config-reveal'
+open 'keywink://navigate?keys=a,b,c'
+open 'keywink://navigate?keys=a,b,c&execute=false'
 ```
 
-#### Window Control
-```bash
-# Show Leader Key window
-open "leaderkey://activate"
+Unknown commands show the launcher. Keywink does not register or handle Leader Key's URL scheme.
 
-# Hide Leader Key window
-open "leaderkey://hide"
+## Releases and updates
 
-# Clear navigation state (return to root)
-open "leaderkey://reset"
-```
+Future downloads belong in [Keywink releases](https://github.com/niklas-heer/Keywink/releases). `brew install leader-key` installs the upstream app; there is no Keywink cask yet.
 
-#### Settings & Info
-```bash
-# Open settings window
-open "leaderkey://settings"
+Automatic updates remain disabled until Keywink's own HTTPS appcast and EdDSA public key are configured. The inherited upstream update feed, signing key, Apple team, and publishing workflow are removed. Local release tasks prepare artifacts; publishing is a separate step. See [RELEASE.md](RELEASE.md).
 
-# Show about dialog
-open "leaderkey://about"
-```
+## Contributing
 
-#### Navigation
-```bash
-# Navigate through keys and execute actions
-open "leaderkey://navigate?keys=a,b,c"
-
-# Navigate without executing (preview mode)
-open "leaderkey://navigate?keys=a,b,c&execute=false"
-```
-
-### Example Use Cases
-
-- **Alfred/Raycast workflows**: Trigger Leader Key shortcuts programmatically
-- **Shell scripts**: Automate configuration reloads after editing config.json
-- **Keyboard maestro**: Chain Leader Key actions with other automations
-- **External triggers**: Open specific action sequences from other applications
-
-## FAQ
-
-#### What do I set as my Leader Key?
-
-Any key can be your leader key, but **only modifiers will not work**.
-
-**Examples:**
-
-- <kbd>F12</kbd>
-- <kbd>⌘ + space</kbd>
-- <kbd>⌘⌥ + space</kbd>
-- <kbd>⌘⌥⌃⇧ + L</kbd> (hyper key)
-
-**Advanced examples:**
-
-Using [Karabiner](https://karabiner-elements.pqrs.org/) you can do more fancy things like:
-
-- <kbd>right ⌘ + left ⌘</kbd> at once (bound to <kbd>F12</kbd>) my personal favorite
-- <kbd>caps lock</kbd> (bound to <kbd>hyper</kbd> when held, <kbd>F12</kbd> when pressed)
-
-See [@mikker's config](https://github.com/mikker/LeaderKey.app/wiki/@mikker's-config) in the wiki for akimbo cmds example.
-
-#### I disabled the menubar item, how can I get Leader Key back?
-
-Activate Leader Key, then <kbd>cmd + ,</kbd>.
-
-#### Command action is failing with "Command not found"
-
-You need to make sure your shell environment is correctly set up for non-interactive mode, and exports the `PATH` variable.
-
-**For zsh** make sure you have your `PATH` variable exported in `~/.zshenv`
-
-**For bash** make sure you have your `PATH` variable exported in `~/.bash_profile`
-
+Track work in [Keywink's issues](https://github.com/niklas-heer/Keywink/issues). [DECISIONS.md](DECISIONS.md) records the fork baseline and migration choices. Upstream fixes and editor/overlay improvements will be reviewed against a focused command-launcher scope.
 
 ## License
 
-MIT
+MIT. See [LICENSE](LICENSE).

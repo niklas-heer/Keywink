@@ -133,7 +133,7 @@ enum Cheatsheet {
           if let group = userState.currentGroup {
             HStack {
               KeyBadge(key: group.key ?? "•")
-              Text(group.key == nil ? "Leader Key" : group.displayName)
+              Text(group.key == nil ? "Keywink" : group.displayName)
                 .foregroundStyle(.secondary)
             }
             .padding(.bottom, 8)

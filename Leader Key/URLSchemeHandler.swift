@@ -15,11 +15,11 @@ enum URLSchemeAction: Equatable {
 
 class URLSchemeHandler {
   static func parse(_ url: URL) -> URLSchemeAction {
-    guard url.scheme == "leaderkey" else {
+    guard url.scheme?.lowercased() == "keywink" else {
       return .invalid
     }
 
-    switch url.host {
+    switch url.host?.lowercased() {
     case "settings":
       return .settings
     case "about":
@@ -36,8 +36,8 @@ class URLSchemeHandler {
       return .reset
     case "navigate":
       guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-            let queryItems = components.queryItems,
-            let keysParam = queryItems.first(where: { $0.name == "keys" })?.value
+        let queryItems = components.queryItems,
+        let keysParam = queryItems.first(where: { $0.name == "keys" })?.value
       else {
         return .show
       }

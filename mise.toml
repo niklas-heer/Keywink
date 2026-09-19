@@ -1,0 +1,55 @@
+[tasks.build]
+description = "Build the Keywink app without code signing"
+run = '''
+xcodebuild build \
+  -project "Leader Key.xcodeproj" \
+  -scheme "Leader Key" \
+  -configuration Debug \
+  -destination "platform=macOS" \
+  -derivedDataPath build \
+  CODE_SIGNING_ALLOWED=NO
+'''
+
+[tasks.test]
+description = "Run the isolated Keywink test suite"
+run = '''
+xcodebuild test \
+  -project "Leader Key.xcodeproj" \
+  -scheme "Leader Key" \
+  -destination "platform=macOS" \
+  -testPlan "TestPlan" \
+  -derivedDataPath build \
+  CODE_SIGNING_ALLOWED=NO
+'''
+
+[tasks.format]
+description = "Format Swift sources in place"
+run = '''
+xcrun swift-format format --in-place --recursive \
+  "Leader Key" \
+  "Leader KeyTests"
+'''
+
+[tasks.lint]
+description = "Check Swift formatting"
+run = '''
+xcrun swift-format lint --strict --recursive \
+  "Leader Key" \
+  "Leader KeyTests"
+'''
+
+[tasks.scripts]
+description = "Check release-script syntax"
+run = "bash -n bin/archive bin/bump bin/release"
+
+[tasks.check]
+description = "Run formatting, script checks, and the native test suite"
+depends = ["lint", "scripts", "test"]
+
+[tasks.archive]
+description = "Create a Developer ID archive (requires signing environment)"
+run = "bin/archive"
+
+[tasks.release]
+description = "Export, notarize, and package a local GitHub release artifact"
+run = "bin/release"

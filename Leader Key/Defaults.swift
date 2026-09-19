@@ -21,7 +21,7 @@ enum RuntimeEnvironment {
 
     return FileManager.default.temporaryDirectory
       .appendingPathComponent(
-        "LeaderKeyTests-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)",
+        "KeywinkTests-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)",
         isDirectory: true
       )
       .path
@@ -33,7 +33,7 @@ let defaultsSuite: UserDefaults = {
 
   return UserDefaults(
     suiteName:
-      "com.brnbw.Leader-KeyTests-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)"
+      "de.niklas-heer.KeywinkTests-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)"
   )!
 }()
 

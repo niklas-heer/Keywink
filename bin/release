@@ -1,39 +1,104 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-APP_NAME="Leader Key"
-BUCKET=leader-key-updates
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$repo_root"
 
-if [[ ! -d Updates/Leader\ Key.app ]]; then
-  echo "Archive and export bundle to Updates/$APP_NAME.app first"
-  exit 1
+archive_path=${KEYWINK_ARCHIVE_PATH:-build/release/Keywink.xcarchive}
+artifact_dir=${KEYWINK_ARTIFACT_DIR:-build/release/artifacts}
+
+if [[ -z ${KEYWINK_DEVELOPMENT_TEAM:-} ]]; then
+  echo "KEYWINK_DEVELOPMENT_TEAM is required (the Apple Developer Team ID)." >&2
+  exit 64
 fi
 
-BUILD=$(git rev-list "$(git rev-parse --abbrev-ref HEAD)" | wc -l | awk '{ print $1 }')
-BUILD="$((BUILD + 0))"
-FILENAME="Updates/$APP_NAME.b$BUILD.zip"
+if [[ ! $KEYWINK_DEVELOPMENT_TEAM =~ ^[A-Z0-9]{10}$ ]]; then
+  echo "KEYWINK_DEVELOPMENT_TEAM must be a 10-character Apple Developer Team ID." >&2
+  exit 64
+fi
 
-ditto -c -k --sequesterRsrc --keepParent "Updates/$APP_NAME.app" "$FILENAME"
-bin/generate_appcast Updates
+if [[ -z ${KEYWINK_NOTARY_PROFILE:-} ]]; then
+  echo "KEYWINK_NOTARY_PROFILE is required (a notarytool Keychain profile)." >&2
+  exit 64
+fi
 
-echo "
-<description><![CDATA[
-  <h2>Release notes</h2>
-  <ul>
-    <li><strong>Added:</strong> Thing</li>
-    <li><strong>Fixed:</strong> Thing</li>
-  </ul>
-]]></description>
-" | pbcopy
-echo "Added release notes <dscription> to clipboard"
-read -r -p "Press enter to continue"
-vim Updates/appcast.xml
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Tracked files must be clean before preparing a release." >&2
+  exit 65
+fi
 
-cp -f "$FILENAME" "Updates/$APP_NAME-latest.zip"
+bin/archive "$archive_path"
 
-s3cmd sync -F -P Updates/*.{xml,zip} s3://$BUCKET
+temporary_dir=$(mktemp -d "${TMPDIR:-/tmp}/keywink-release.XXXXXX")
+trap 'rm -rf "$temporary_dir"' EXIT
 
-rm -rf "Updates/{$APP_NAME.app,*.zip}"
+export_options="$temporary_dir/ExportOptions.plist"
+export_dir="$temporary_dir/export"
 
-git add Updates/ ./**/Info.plist
-git commit -m "Release build $BUILD"
+cat > "$export_options" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>destination</key>
+  <string>export</string>
+  <key>method</key>
+  <string>developer-id</string>
+  <key>signingStyle</key>
+  <string>manual</string>
+  <key>teamID</key>
+  <string>$KEYWINK_DEVELOPMENT_TEAM</string>
+</dict>
+</plist>
+EOF
+
+xcodebuild -exportArchive \
+  -archivePath "$archive_path" \
+  -exportPath "$export_dir" \
+  -exportOptionsPlist "$export_options"
+
+app_path="$export_dir/Keywink.app"
+if [[ ! -d $app_path ]]; then
+  echo "Export did not produce $app_path" >&2
+  exit 66
+fi
+
+bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$app_path/Contents/Info.plist")
+if [[ $bundle_id != de.niklas-heer.Keywink ]]; then
+  echo "Expected bundle identifier de.niklas-heer.Keywink, got $bundle_id" >&2
+  exit 65
+fi
+
+codesign --verify --deep --strict --verbose=2 "$app_path"
+
+notary_upload="$temporary_dir/Keywink-notarization.zip"
+ditto -c -k --sequesterRsrc --keepParent "$app_path" "$notary_upload"
+xcrun notarytool submit "$notary_upload" \
+  --keychain-profile "$KEYWINK_NOTARY_PROFILE" \
+  --wait
+
+xcrun stapler staple "$app_path"
+xcrun stapler validate "$app_path"
+spctl --assess --type execute --verbose "$app_path"
+
+version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$app_path/Contents/Info.plist")
+build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$app_path/Contents/Info.plist")
+if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ || ! $build =~ ^[1-9][0-9]*$ ]]; then
+  echo "Refusing to package invalid version $version ($build)." >&2
+  exit 65
+fi
+artifact="$artifact_dir/Keywink-$version-$build.zip"
+
+mkdir -p "$artifact_dir"
+if [[ -e $artifact || -e $artifact.sha256 ]]; then
+  echo "Release artifact already exists for $version ($build) in $artifact_dir" >&2
+  exit 73
+fi
+
+ditto -c -k --sequesterRsrc --keepParent "$app_path" "$artifact"
+shasum -a 256 "$artifact" > "$artifact.sha256"
+
+echo "Prepared notarized GitHub release artifacts:"
+echo "  $artifact"
+echo "  $artifact.sha256"
+echo "Publishing a GitHub release and updating a Sparkle feed are separate manual steps."

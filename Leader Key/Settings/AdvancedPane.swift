@@ -72,7 +72,7 @@ struct AdvancedPane: View {
 
           VStack(alignment: .leading, spacing: 8) {
             Text(
-              "Sticky Mode: When the modifier key is held while triggering an action, Leader Key stays open after the action completes."
+              "Sticky Mode: When the modifier key is held while triggering an action, Keywink stays open after the action completes."
             )
             .font(.callout)
             .foregroundColor(.secondary)
@@ -101,7 +101,7 @@ struct AdvancedPane: View {
         }
 
         Text(
-          "The cheatsheet can always be manually shown by \"?\" when Leader Key is activated."
+          "The cheatsheet can always be manually shown by \"?\" when Keywink is activated."
         )
         .padding(.vertical, 2)
 
@@ -120,13 +120,13 @@ struct AdvancedPane: View {
       Settings.Section(title: "Activation", bottomDivider: true) {
         VStack(alignment: .leading) {
           Text(
-            "Pressing the global shortcut key while Leader Key is active should …"
+            "Pressing the global shortcut key while Keywink is active should …"
           )
 
           Picker(
             "Reactivation behavior", selection: $reactivateBehavior
           ) {
-            Text("Hide Leader Key").tag(ReactivateBehavior.hide)
+            Text("Hide Keywink").tag(ReactivateBehavior.hide)
             Text("Reset group selection").tag(ReactivateBehavior.reset)
             Text("Do nothing").tag(ReactivateBehavior.nothing)
           }
@@ -135,7 +135,7 @@ struct AdvancedPane: View {
         }
       }
 
-      Settings.Section(title: "Show Leader Key on", bottomDivider: true) {
+      Settings.Section(title: "Show Keywink on", bottomDivider: true) {
         Picker("", selection: $screen) {
           Text("Screen containing mouse").tag(Screen.mouse)
           Text("Primary screen").tag(Screen.primary)
@@ -145,7 +145,7 @@ struct AdvancedPane: View {
         .frame(width: 220)
       }
       Settings.Section(title: "Other") {
-        Defaults.Toggle("Show Leader Key in menubar", key: .showMenuBarIcon)
+        Defaults.Toggle("Show Keywink in menubar", key: .showMenuBarIcon)
         VStack(alignment: .leading, spacing: 4) {
           Defaults.Toggle(
             "Force English keyboard layout", key: .forceEnglishKeyboardLayout)

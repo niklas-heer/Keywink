@@ -22,6 +22,7 @@ class StatusItem {
   var handleReloadConfig: (() -> Void)?
   var handleRevealConfig: (() -> Void)?
   var handleCheckForUpdates: (() -> Void)?
+  var updateMenuTitle = "Keywink Releases…"
 
   func enable() {
     statusItem = NSStatusBar.system.statusItem(
@@ -40,7 +41,7 @@ class StatusItem {
 
     // About
     let aboutItem = NSMenuItem(
-      title: "About Leader Key", action: #selector(showAbout),
+      title: "About Keywink", action: #selector(showAbout),
       keyEquivalent: ""
     )
     aboutItem.target = self
@@ -57,7 +58,7 @@ class StatusItem {
     menu.addItem(NSMenuItem.separator())
 
     let checkForUpdatesItem = NSMenuItem(
-      title: "Check for Updates...", action: #selector(checkForUpdates),
+      title: updateMenuTitle, action: #selector(checkForUpdates),
       keyEquivalent: ""
     )
     checkForUpdatesItem.target = self
@@ -82,7 +83,7 @@ class StatusItem {
 
     menu.addItem(
       NSMenuItem(
-        title: "Quit Leader Key",
+        title: "Quit Keywink",
         action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"
       ))
 

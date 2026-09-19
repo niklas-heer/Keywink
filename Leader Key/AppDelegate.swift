@@ -46,8 +46,10 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     else { return }
     guard !isRunningTests() else { return }
 
-    updaterController = SPUStandardUpdaterController(
-      startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self)
+    if Self.hasUpdateConfiguration(Bundle.main.infoDictionary ?? [:]) {
+      updaterController = SPUStandardUpdaterController(
+        startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self)
+    }
 
     UNUserNotificationCenter.current().delegate = self
 
@@ -69,8 +71,14 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     statusItem.handleRevealConfig = {
       NSWorkspace.shared.activateFileViewerSelecting([self.config.url])
     }
+    statusItem.updateMenuTitle =
+      updaterController == nil ? "Keywink Releases…" : "Check for Updates…"
     statusItem.handleCheckForUpdates = {
-      self.updaterController?.checkForUpdates(nil)
+      if let updaterController = self.updaterController {
+        updaterController.checkForUpdates(nil)
+      } else {
+        NSWorkspace.shared.open(URL(string: "https://github.com/niklas-heer/Keywink/releases")!)
+      }
     }
 
     Task {
@@ -169,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate,
       requestNotificationsAuthorizationIfNeeded { granted in
         guard granted else { return }
         let content = UNMutableNotificationContent()
-        content.title = "Leader Key Update Available"
+        content.title = "Keywink Update Available"
         content.body = "Version \(update.displayVersionString) is now available"
 
         let request = UNNotificationRequest(
@@ -211,6 +219,15 @@ class AppDelegate: NSObject, NSApplicationDelegate,
 
   func isRunningTests() -> Bool {
     RuntimeEnvironment.isRunningTests
+  }
+
+  static func hasUpdateConfiguration(_ info: [String: Any]) -> Bool {
+    guard let feed = info["SUFeedURL"] as? String,
+      let url = URL(string: feed), url.scheme == "https", url.host?.isEmpty == false,
+      let publicKey = info["SUPublicEDKey"] as? String,
+      let keyData = Data(base64Encoded: publicKey), keyData.count == 32
+    else { return false }
+    return true
   }
 
   // MARK: - URL Scheme Handling
