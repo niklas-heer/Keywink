@@ -2,13 +2,15 @@
 
 This file provides guidance to coding agents when working with code in this repository.
 
-# Leader Key Development Guide
+# Keywink Development Guide
+
+Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [DECISIONS.md](DECISIONS.md) for the accepted identity and upstream baseline. The Xcode scheme and source paths still use Leader Key names. Release and app-identity migration are pending; the inherited release commands below are references, not a configured Keywink release process.
 
 ## Build & Test Commands
 
 - Build and run: `xcodebuild -scheme "Leader Key" -configuration Debug build`
 - Run all tests: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" test`
-- Run single test: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" -only-testing:Leader KeyTests/UserConfigTests/testInitializesWithDefaults test`
+- Run single test: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" '-only-testing:Leader KeyTests/UserConfigTests/testInitializesWithDefaults' test`
 - Bump version: `bin/bump`
 - Create release: `bin/release`
 
@@ -40,7 +42,7 @@ Leader Key is a macOS application that provides customizable keyboard shortcuts.
 **Testing Architecture:**
 
 - Uses XCTest with custom `TestAlertManager` for UI testing
-- Tests use isolated UserDefaults and temporary directories
+- Some tests use isolated UserDefaults and temporary directories, but isolation is incomplete. `UserConfigTests.testCreatesDefaultConfigDirIfNotExists` deletes `UserConfig.defaultDirectory()`, currently the real user's `~/Library/Application Support/Leader Key` directory. Other tests also write to that default path. Fix path injection/isolation before running the inherited suite on a normal user account; until then use a disposable macOS account or runner. See upstream [PR 313](https://github.com/mikker/LeaderKey/pull/313) as a review candidate, not a verified fix.
 - Focus on configuration validation and state management
 
 ## Code Style Guidelines
@@ -56,4 +58,3 @@ Leader Key is a macOS application that provides customizable keyboard shortcuts.
 - **Documentation**: Use comments for complex logic or non-obvious implementations
 
 Follow Swift idioms and default formatting (4-space indentation, spaces around operators).
-

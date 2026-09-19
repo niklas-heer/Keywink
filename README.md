@@ -1,4 +1,26 @@
-# NB: Leader Key has been surpassed by [Tuna](https://tunaformac.com)
+# Keywink
+
+A native macOS command launcher with memorable key sequences, visual hints, and a focus on easy configuration.
+
+Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderKey), created by Mikkel Malmberg and its contributors. Their history and [MIT license](LICENSE) are preserved.
+
+## Fork status
+
+This is the initial source fork. There is no Keywink release yet. The Xcode project, app identity, configuration location, URL scheme, signing settings, and update infrastructure still use the inherited Leader Key setup. The download and Homebrew instructions in the upstream documentation below install **Leader Key**, not Keywink.
+
+Proposed first milestone:
+
+1. Isolate configuration tests from real user files and establish a reproducible build/test baseline.
+2. Give Keywink its own app identity and release/update configuration, with an explicit import path for existing Leader Key settings.
+3. Review upstream fixes and editor/overlay improvements against a focused command-launcher scope.
+
+See [development guidance](AGENTS.md) for inherited commands and the known test-isolation issue, and [decisions](DECISIONS.md) for the fork baseline. Track Keywink work in [this repository's issues](https://github.com/niklas-heer/Keywink/issues).
+
+## Upstream documentation
+
+The following is inherited Leader Key documentation, including the original author's announcement and installation links.
+
+### Upstream announcement: Leader Key has been surpassed by [Tuna](https://tunaformac.com)
 
 Tuna is a complete launcher – much more capable, and with **Leader Key built in!**
 
