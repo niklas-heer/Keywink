@@ -28,6 +28,10 @@ Open Keywink's menu bar item, choose **Settings…**, and record the shortcut th
 
 **Top Edge** is the default launcher theme: a compact keyboard guide below the menu bar, with two columns of keys and labels and a breadcrumb inside groups. Its softly rounded native-material surface keeps clear of the camera on built-in and external displays. Width and top position stay steady while the height adjusts to the group; larger groups scroll. Press Backspace or click **All shortcuts** to return to the root, and Escape to dismiss. It follows light/dark appearance and the system's reduced-motion/transparency settings. Choose **Settings → General → Theme → Top Edge** if you previously selected another theme; the original themes remain available.
 
+To open a group directly, give a top-level group a key, then use **Record Shortcut** beside that group. For example, bind Hyper+G to an applications group, release Hyper, and press T to choose its Terminal action. The separate **Shortcut** below the config list opens the root launcher. The small key button in each row sets the key used *inside* Keywink, not a global shortcut.
+
+Hyper combinations are displayed as their modifiers, such as **⌃⌥⇧⌘G**. If Raycast supplies Hyper, keep it running and match its **Include Shift** setting. Avoid binding a combination already owned by another launcher or keyboard utility. Configuration JSON contains the groups/actions; global activation shortcuts are saved separately in Keywink's preferences.
+
 Keywink stores `config.json` in `~/Library/Application Support/Keywink/`. Preferences, shortcuts, and launch-at-login registration belong to Keywink's bundle identity. Choose a different configuration directory in Advanced settings if needed.
 
 ### Import from Leader Key

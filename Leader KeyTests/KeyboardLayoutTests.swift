@@ -1,5 +1,8 @@
+import AppKit
+import Carbon.HIToolbox
 import Combine
 import Defaults
+import KeyboardShortcuts
 import XCTest
 
 @testable import Leader_Key
@@ -139,5 +142,131 @@ class KeyboardLayoutTests: XCTestCase {
 
     // Should return the KeyMaps entry for left arrow
     XCTAssertEqual(result, "←", "Special keys should always use KeyMaps")
+  }
+}
+
+final class ShortcutRecorderTests: XCTestCase {
+  @MainActor
+  func testRecorderSurvivesFieldEditorRestartsAndCapturesHyperShortcuts() throws {
+    var changes: [KeyboardShortcuts.Shortcut?] = []
+    let recorder = KeyboardShortcuts.RecorderCocoa(shortcut: nil) { shortcut in
+      changes.append(shortcut)
+    }
+    recorder.conflictPolicy = .allowAll
+
+    let stackView = NSStackView(views: [recorder])
+    stackView.orientation = .vertical
+    stackView.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+
+    let window = NSWindow(
+      contentRect: NSRect(x: 0, y: 0, width: 240, height: 80),
+      styleMask: [.titled],
+      backing: .buffered,
+      defer: false)
+    window.isReleasedWhenClosed = false
+    window.contentView = stackView
+    window.makeKeyAndOrderFront(nil)
+    window.layoutIfNeeded()
+    defer { window.close() }
+
+    let inactivePlaceholder = recorder.placeholderString
+
+    try focus(recorder, in: window, inactivePlaceholder: inactivePlaceholder)
+    sendHyperKey(.w, keyCode: kVK_ANSI_W, to: window)
+    drainMainRunLoop()
+    XCTAssertEqual(changes, [KeyboardShortcuts.Shortcut(.w, modifiers: hyperModifiers)])
+    XCTAssertEqual(recorder.shortcut, KeyboardShortcuts.Shortcut(.w, modifiers: hyperModifiers))
+
+    try focus(recorder, in: window, inactivePlaceholder: inactivePlaceholder)
+    sendHyperKey(.b, keyCode: kVK_ANSI_B, to: window)
+    drainMainRunLoop()
+    XCTAssertEqual(
+      changes,
+      [
+        KeyboardShortcuts.Shortcut(.w, modifiers: hyperModifiers),
+        KeyboardShortcuts.Shortcut(.b, modifiers: hyperModifiers),
+      ])
+    XCTAssertEqual(recorder.shortcut, KeyboardShortcuts.Shortcut(.b, modifiers: hyperModifiers))
+
+    try focus(recorder, in: window, inactivePlaceholder: inactivePlaceholder)
+    sendKey(.escape, keyCode: kVK_Escape, modifiers: [], to: window)
+    drainMainRunLoop()
+
+    XCTAssertNil(recorder.currentEditor(), "Escape should cancel recording")
+    XCTAssertEqual(recorder.placeholderString, inactivePlaceholder)
+    XCTAssertEqual(changes.count, 2, "Cancelling must not emit a shortcut change")
+    XCTAssertEqual(recorder.shortcut, KeyboardShortcuts.Shortcut(.b, modifiers: hyperModifiers))
+  }
+
+  private let hyperModifiers: NSEvent.ModifierFlags = [.control, .option, .shift, .command]
+
+  @MainActor
+  private func focus(
+    _ recorder: KeyboardShortcuts.RecorderCocoa,
+    in window: NSWindow,
+    inactivePlaceholder: String?
+  ) throws {
+    let clickLocation = recorder.convert(
+      NSPoint(x: recorder.bounds.midX, y: recorder.bounds.midY), to: nil)
+
+    for eventType in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
+      let event = try XCTUnwrap(
+        NSEvent.mouseEvent(
+          with: eventType,
+          location: clickLocation,
+          modifierFlags: [],
+          timestamp: ProcessInfo.processInfo.systemUptime,
+          windowNumber: window.windowNumber,
+          context: nil,
+          eventNumber: 0,
+          clickCount: 1,
+          pressure: eventType == .leftMouseDown ? 1 : 0))
+      NSApp.sendEvent(event)
+    }
+
+    // macOS 26 and later may end and restart editing after the click and placeholder update.
+    drainMainRunLoop()
+
+    let editor = try XCTUnwrap(recorder.currentEditor())
+    XCTAssertTrue(window.firstResponder === editor)
+    XCTAssertNotEqual(
+      recorder.placeholderString, inactivePlaceholder,
+      "The recorder stopped during AppKit's field-editor restart")
+  }
+
+  @MainActor
+  private func sendHyperKey(
+    _ key: KeyboardShortcuts.Key,
+    keyCode: Int,
+    to window: NSWindow
+  ) {
+    sendKey(key, keyCode: keyCode, modifiers: hyperModifiers, to: window)
+  }
+
+  @MainActor
+  private func sendKey(
+    _ key: KeyboardShortcuts.Key,
+    keyCode: Int,
+    modifiers: NSEvent.ModifierFlags,
+    to window: NSWindow
+  ) {
+    let character = key == .escape ? "\u{1B}" : key == .w ? "w" : "b"
+    let event = NSEvent.keyEvent(
+      with: .keyDown,
+      location: .zero,
+      modifierFlags: modifiers,
+      timestamp: ProcessInfo.processInfo.systemUptime,
+      windowNumber: window.windowNumber,
+      context: nil,
+      characters: character,
+      charactersIgnoringModifiers: character,
+      isARepeat: false,
+      keyCode: UInt16(keyCode))!
+    NSApp.sendEvent(event)
+  }
+
+  @MainActor
+  private func drainMainRunLoop() {
+    RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
   }
 }
