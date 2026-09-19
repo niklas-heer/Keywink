@@ -217,39 +217,13 @@ final class ShortcutRecorderTests: XCTestCase {
     in window: NSWindow,
     inactivePlaceholder: String?
   ) throws {
-    let clickLocation = recorder.convert(
-      NSPoint(x: recorder.bounds.midX, y: recorder.bounds.midY), to: nil)
+    // Synthesized mouse-down enters NSSearchField tracking and never returns
+    // on a headless CI runner. Drive first responder directly, then replay the
+    // AppKit field-editor restart that macOS 26 posts after a click.
+    XCTAssertTrue(window.makeFirstResponder(recorder))
+    recorder.controlTextDidEndEditing(
+      Notification(name: NSControl.textDidEndEditingNotification, object: recorder))
 
-    let mouseDown = try XCTUnwrap(
-      NSEvent.mouseEvent(
-        with: .leftMouseDown,
-        location: clickLocation,
-        modifierFlags: [],
-        timestamp: ProcessInfo.processInfo.systemUptime,
-        windowNumber: window.windowNumber,
-        context: nil,
-        eventNumber: 0,
-        clickCount: 1,
-        pressure: 1))
-    let mouseUp = try XCTUnwrap(
-      NSEvent.mouseEvent(
-        with: .leftMouseUp,
-        location: clickLocation,
-        modifierFlags: [],
-        timestamp: ProcessInfo.processInfo.systemUptime,
-        windowNumber: window.windowNumber,
-        context: nil,
-        eventNumber: 0,
-        clickCount: 1,
-        pressure: 0))
-    // sendEvent(mouseDown) can enter AppKit mouse tracking. Deliver mouseUp
-    // in event-tracking mode so that nested run loop can exit on CI.
-    RunLoop.current.perform(inModes: [.default, .eventTracking, .common]) {
-      NSApp.sendEvent(mouseUp)
-    }
-    NSApp.sendEvent(mouseDown)
-
-    // macOS 26 and later may end and restart editing after the click and placeholder update.
     let editor = try waitForEditor(in: recorder)
     XCTAssertTrue(window.firstResponder === editor)
     XCTAssertNotEqual(
