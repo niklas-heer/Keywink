@@ -26,6 +26,8 @@ Tests use temporary configuration directories and an isolated preferences domain
 
 Open Keywink's menu bar item, choose **Settings…**, and record the shortcut that opens the launcher. Add actions or groups in the configuration editor. Then press your shortcut followed by the keys in a sequence: for example, `o`, then `m` to open Messages.
 
+**Top Edge** is the default launcher theme: a wide, native-material panel below the menu bar, with a curved bridge beneath the camera on supported MacBooks. Shortcut hints are built in, and the panel resizes as you navigate groups. It follows light/dark appearance and the system's reduced-motion/transparency settings. Choose **Settings → General → Theme → Top Edge** if you previously selected another theme; the original themes remain available.
+
 Keywink stores `config.json` in `~/Library/Application Support/Keywink/`. Preferences, shortcuts, and launch-at-login registration belong to Keywink's bundle identity. Choose a different configuration directory in Advanced settings if needed.
 
 ### Import from Leader Key

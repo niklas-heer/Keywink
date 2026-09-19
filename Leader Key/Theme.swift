@@ -1,6 +1,7 @@
 import Defaults
 
 enum Theme: String, Defaults.Serializable {
+  case topEdge
   case mysteryBox
   case mini
   case breadcrumbs
@@ -8,11 +9,13 @@ enum Theme: String, Defaults.Serializable {
   case cheater
 
   static var all: [Theme] {
-    return [.mysteryBox, .mini, .breadcrumbs, .forTheHorde, .cheater]
+    return [.topEdge, .mysteryBox, .mini, .breadcrumbs, .forTheHorde, .cheater]
   }
 
   static func classFor(_ value: Theme) -> MainWindow.Type {
     switch value {
+    case .topEdge:
+      return TopEdge.Window.self
     case .mysteryBox:
       return MysteryBox.Window.self
     case .mini:
@@ -28,6 +31,7 @@ enum Theme: String, Defaults.Serializable {
 
   static func name(_ value: Theme) -> String {
     switch value {
+    case .topEdge: return "Top Edge"
     case .mysteryBox: return "Mystery Box"
     case .mini: return "Mini"
     case .breadcrumbs: return "Breadcrumbs"

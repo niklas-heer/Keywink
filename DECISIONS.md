@@ -43,3 +43,15 @@ The user explicitly selected mise for setup. Use it for native Xcode build/test 
 Use Keywink's GitHub releases for future artifacts. The local release scripts create a fresh Developer ID archive, export, notarize, staple, verify, and package the app with a checksum. They do not tag, publish, upload to an upstream bucket, or auto-commit. Supply the Apple team/certificate and notary Keychain profile outside the repository. These external signing steps require maintainer setup before the first public release.
 
 Remove the inherited Apple team, S3 uploader, appcast workflow, Sparkle key/feed, and checked-in Sparkle executables. Instantiate Sparkle only when a valid HTTPS feed and 32-byte public key are explicitly supplied through Keywink build settings. Until then, the app links to Keywink's release page. An independently hosted appcast, retained private key, and real signed-update test remain prerequisites before enabling updates. See [RELEASE.md](RELEASE.md) and [Sparkle's programmatic setup](https://sparkle-project.org/documentation/programmatic-setup/).
+
+## 5. Offer a fluid top-edge launcher
+
+Date: 2026-09-19. Status: implemented design direction; visual refinement remains open.
+
+Niklas disliked the centered square and proposed a top-oriented, more fluid launcher that follows the system theme and fits newer MacBook camera housings. A screenshot from another shell project served as visual inspiration, not a request to copy that project's functionality.
+
+Implement **Top Edge** as the default for an unset theme preference. Keep existing themes and explicit selections. Use native macOS material, light/dark colors, a curved bridge below a detected notch, and a rounded floating fallback below the menu bar on ordinary displays. Keep shortcut hints within the wide panel; resize for each group and scroll large groups. Respect reduced motion and reduced transparency. The exact layout, name, and default are implementation choices within this requested direction.
+
+Position against the selected display's current visible frame and camera safe-area information, including external monitors with nonzero or negative origins and side Docks. Bound the panel to that usable area. Guard animation completions so dismissing and reopening cannot close a new presentation.
+
+Verification: all 51 tests and strict formatting pass, including geometry cases and native panel presentation/navigation/dismissal, config-replacement invalidation, and rapid dismiss/reopen behavior. Light and dark renders were inspected; the notch silhouette was also rendered with simulated camera geometry. This does not claim an end-to-end check on every physical notch/display configuration.

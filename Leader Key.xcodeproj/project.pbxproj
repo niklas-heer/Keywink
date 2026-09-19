@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A01A01A01A01A01A01A01001 /* TopEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01A01A01A01A01A01A01002 /* TopEdge.swift */; };
+		A01A01A01A01A01A01A01003 /* TopEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01A01A01A01A01A01A01004 /* TopEdgeTests.swift */; };
 		115AA5BF2DA521C600C17E18 /* ActionIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115AA5BE2DA521C200C17E18 /* ActionIcon.swift */; };
 		115AA5C22DA546D500C17E18 /* SymbolPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 115AA5C12DA546D500C17E18 /* SymbolPicker */; };
 		130196C62D73B3DE0093148B /* Breadcrumbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130196C52D73B3DC0093148B /* Breadcrumbs.swift */; };
@@ -68,6 +70,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A01A01A01A01A01A01A01002 /* TopEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopEdge.swift; sourceTree = "<group>"; };
+		A01A01A01A01A01A01A01004 /* TopEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopEdgeTests.swift; sourceTree = "<group>"; };
 		115AA5BE2DA521C200C17E18 /* ActionIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionIcon.swift; sourceTree = "<group>"; };
 		130196C52D73B3DC0093148B /* Breadcrumbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Breadcrumbs.swift; sourceTree = "<group>"; };
 		423632142D678F4400878D92 /* TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestPlan.xctestplan; sourceTree = "<group>"; };
@@ -147,6 +151,7 @@
 				130196C52D73B3DC0093148B /* Breadcrumbs.swift */,
 				423632212D68CA6500878D92 /* MysteryBox.swift */,
 				4254953F2D75EFAD0020300E /* ForTheHorde.swift */,
+				A01A01A01A01A01A01A01002 /* TopEdge.swift */,
 				423632252D68CDBB00878D92 /* Mini.swift */,
 				606C56EE2DAB875A00198B9F /* Cheater.swift */,
 			);
@@ -224,6 +229,7 @@
 		427C17FB2BD311B500955B98 /* Leader KeyTests */ = {
 			isa = PBXGroup;
 			children = (
+				A01A01A01A01A01A01A01004 /* TopEdgeTests.swift */,
 				4284834B2E813212009D7EEF /* KeyboardLayoutTests.swift */,
 				42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */,
 				EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */,
@@ -384,6 +390,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A01A01A01A01A01A01A01001 /* TopEdge.swift in Sources */,
 				427C182B2BD31E2E00955B98 /* Controller.swift in Sources */,
 				423632222D68CA6500878D92 /* MysteryBox.swift in Sources */,
 				605385A32D523CAD00BEDB4B /* Pulsate.swift in Sources */,
@@ -425,6 +432,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A01A01A01A01A01A01A01003 /* TopEdgeTests.swift in Sources */,
 				42454DDD2D71CBAB004E1374 /* ConfigValidatorTests.swift in Sources */,
 				EC5CEBC4C47B4C5DB2258813 /* URLSchemeTests.swift in Sources */,
 				427C17FD2BD311B500955B98 /* UserConfigTests.swift in Sources */,

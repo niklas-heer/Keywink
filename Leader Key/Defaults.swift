@@ -47,7 +47,7 @@ extension Defaults.Keys {
   static let modifierKeyConfiguration = Key<ModifierKeyConfig>(
     "modifierKeyConfiguration", default: .controlGroupOptionSticky, suite: defaultsSuite)
   static let theme = Key<Theme>(
-    "theme", default: .mysteryBox, suite: defaultsSuite)
+    "theme", default: .topEdge, suite: defaultsSuite)
 
   static let autoOpenCheatsheet = Key<AutoOpenCheatsheetSetting>(
     "autoOpenCheatsheet",
