@@ -165,9 +165,20 @@ final class ShortcutRecorderTests: XCTestCase {
       defer: false)
     window.isReleasedWhenClosed = false
     window.contentView = stackView
+    let originalPolicy = NSApp.activationPolicy()
+    NSApp.setActivationPolicy(.regular)
+    if #available(macOS 14.0, *) {
+      NSApp.activate()
+    } else {
+      NSApp.activate(ignoringOtherApps: true)
+    }
     window.makeKeyAndOrderFront(nil)
     window.layoutIfNeeded()
-    defer { window.close() }
+    drainMainRunLoop()
+    defer {
+      window.close()
+      NSApp.setActivationPolicy(originalPolicy)
+    }
 
     let inactivePlaceholder = recorder.placeholderString
 
@@ -209,29 +220,56 @@ final class ShortcutRecorderTests: XCTestCase {
     let clickLocation = recorder.convert(
       NSPoint(x: recorder.bounds.midX, y: recorder.bounds.midY), to: nil)
 
-    for eventType in [NSEvent.EventType.leftMouseDown, .leftMouseUp] {
-      let event = try XCTUnwrap(
-        NSEvent.mouseEvent(
-          with: eventType,
-          location: clickLocation,
-          modifierFlags: [],
-          timestamp: ProcessInfo.processInfo.systemUptime,
-          windowNumber: window.windowNumber,
-          context: nil,
-          eventNumber: 0,
-          clickCount: 1,
-          pressure: eventType == .leftMouseDown ? 1 : 0))
-      NSApp.sendEvent(event)
+    let mouseDown = try XCTUnwrap(
+      NSEvent.mouseEvent(
+        with: .leftMouseDown,
+        location: clickLocation,
+        modifierFlags: [],
+        timestamp: ProcessInfo.processInfo.systemUptime,
+        windowNumber: window.windowNumber,
+        context: nil,
+        eventNumber: 0,
+        clickCount: 1,
+        pressure: 1))
+    let mouseUp = try XCTUnwrap(
+      NSEvent.mouseEvent(
+        with: .leftMouseUp,
+        location: clickLocation,
+        modifierFlags: [],
+        timestamp: ProcessInfo.processInfo.systemUptime,
+        windowNumber: window.windowNumber,
+        context: nil,
+        eventNumber: 0,
+        clickCount: 1,
+        pressure: 0))
+    // sendEvent(mouseDown) can enter AppKit mouse tracking. Deliver mouseUp
+    // in event-tracking mode so that nested run loop can exit on CI.
+    RunLoop.current.perform(inModes: [.default, .eventTracking, .common]) {
+      NSApp.sendEvent(mouseUp)
     }
+    NSApp.sendEvent(mouseDown)
 
     // macOS 26 and later may end and restart editing after the click and placeholder update.
-    drainMainRunLoop()
-
-    let editor = try XCTUnwrap(recorder.currentEditor())
+    let editor = try waitForEditor(in: recorder)
     XCTAssertTrue(window.firstResponder === editor)
     XCTAssertNotEqual(
       recorder.placeholderString, inactivePlaceholder,
       "The recorder stopped during AppKit's field-editor restart")
+  }
+
+  @MainActor
+  private func waitForEditor(
+    in recorder: KeyboardShortcuts.RecorderCocoa,
+    timeout: TimeInterval = 2
+  ) throws -> NSText {
+    let deadline = Date().addingTimeInterval(timeout)
+    while Date() < deadline {
+      drainMainRunLoop()
+      if let editor = recorder.currentEditor() {
+        return editor
+      }
+    }
+    return try XCTUnwrap(recorder.currentEditor(), "Recorder did not start editing after the click")
   }
 
   @MainActor
