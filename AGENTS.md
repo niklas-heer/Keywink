@@ -33,8 +33,8 @@ Keywink is a macOS application that provides customizable keyboard shortcuts. Th
 **Theme System:**
 
 - Themes inherit from `MainWindow`, host SwiftUI content, and implement show/hide behavior
-- Available themes: TopEdge (default), MysteryBox, Mini, Breadcrumbs, ForTheHorde, Cheater
-- TopEdge includes its own shortcut grid. Position it on the selected screen using global coordinates, the visible frame, and camera safe-area information; keep interactive content below the menu bar/notch.
+- Available themes: Key Guide (default; internal `TopEdge`/`topEdge` names retained for preference compatibility), MysteryBox, Mini, Breadcrumbs, ForTheHorde, Cheater
+- Key Guide includes its own shortcut grid, icons, and group path. Center it in the selected screen's visible frame using global coordinates; bound its size to the usable area.
 - Each theme provides different visual representations of shortcuts
 
 **Configuration Flow:**

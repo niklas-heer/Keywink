@@ -79,6 +79,33 @@ final class UserConfigTests: XCTestCase {
     XCTAssertEqual(testAlertManager.shownAlerts.count, 0)
   }
 
+  func testGlobalGroupNavigationReplacesTheCurrentPath() {
+    let nested = Group(key: "r", label: "Nested group", actions: [])
+    let applications = Group(key: "g", label: "Applications", actions: [.group(nested)])
+    let raycast = Group(key: "r", label: "Raycast", actions: [])
+    subject.root = Group(
+      key: nil,
+      actions: [
+        .group(applications), .group(raycast),
+        .action(Action(key: "t", type: .command, value: "must not run")),
+      ])
+    let state = UserState(userConfig: subject)
+    state.navigateToGroup(applications)
+    state.navigateToGroup(nested)
+
+    XCTAssertTrue(state.openRootGroup(for: "r"))
+    XCTAssertEqual(state.navigationPath, [raycast])
+    XCTAssertEqual(state.display, "r")
+    XCTAssertTrue(state.openRootGroup(for: "g"))
+    XCTAssertEqual(state.navigationPath, [applications])
+    XCTAssertTrue(state.openRootGroup(for: "g"))
+    XCTAssertEqual(state.navigationPath, [applications])
+
+    XCTAssertFalse(state.openRootGroup(for: "t"))
+    XCTAssertFalse(state.openRootGroup(for: "missing"))
+    XCTAssertEqual(state.navigationPath, [applications])
+  }
+
   func testCreatesDefaultConfigDirIfNotExists() throws {
     let defaultDir = testDefaultDir!
     configDirectoryStore.path = defaultDir

@@ -38,4 +38,22 @@ final class UserState: ObservableObject {
   func navigateToGroup(_ group: Group) {
     navigationPath.append(group)
   }
+
+  /// Global group shortcuts always resolve from the root, even inside another group.
+  @discardableResult
+  func openRootGroup(for key: String) -> Bool {
+    guard
+      let group = userConfig.root.actions.compactMap({ item -> Group? in
+        guard case .group(let group) = item,
+          KeyMaps.glyph(for: group.key ?? "") == KeyMaps.glyph(for: key)
+        else { return nil }
+        return group
+      }).first
+    else { return false }
+
+    isShowingRefreshState = false
+    display = group.key
+    navigationPath = [group]
+    return true
+  }
 }

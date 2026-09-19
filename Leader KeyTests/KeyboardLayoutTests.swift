@@ -270,3 +270,35 @@ final class ShortcutRecorderTests: XCTestCase {
     RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.05))
   }
 }
+
+final class CommandRunnerTests: XCTestCase {
+  func testLargeFailingCommandDoesNotBlockMainQueue() throws {
+    let mainQueueAdvanced = expectation(description: "main queue advanced")
+    let commandCompleted = expectation(description: "command completed")
+    var executionResult: Swift.Result<CommandRunner.Execution, Error>?
+
+    DispatchQueue.main.async {
+      CommandRunner.execute(
+        "sleep 0.5; /usr/bin/yes x | /usr/bin/head -c 262144; "
+          + "printf 'intentional failure\\n' >&2; exit 23"
+      ) { result in
+        XCTAssertTrue(Thread.isMainThread)
+        executionResult = result
+        commandCompleted.fulfill()
+      }
+
+      DispatchQueue.main.async {
+        XCTAssertNil(executionResult, "The command should still be running")
+        mainQueueAdvanced.fulfill()
+      }
+    }
+
+    wait(for: [mainQueueAdvanced], timeout: 0.25)
+    wait(for: [commandCompleted], timeout: 5)
+
+    let execution = try XCTUnwrap(executionResult).get()
+    XCTAssertEqual(execution.terminationStatus, 23)
+    XCTAssertEqual(execution.standardOutput.count, 262144)
+    XCTAssertEqual(String(data: execution.standardError, encoding: .utf8), "intentional failure\n")
+  }
+}

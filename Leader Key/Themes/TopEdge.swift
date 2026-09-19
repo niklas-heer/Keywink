@@ -2,28 +2,29 @@ import Cocoa
 import Combine
 import SwiftUI
 
-/// A top-anchored launcher that keeps all interactive content below the camera housing.
+/// A centered keyboard guide that presents shortcuts like editor completions.
 enum TopEdge {
   struct Layout {
     let frame: NSRect
     let columns: Int
 
     static func make(
-      screenFrame: NSRect, visibleFrame: NSRect, safeTop: CGFloat,
-      itemCount: Int, hasBreadcrumb: Bool = false
+      screenFrame: NSRect, visibleFrame: NSRect, itemCount: Int,
+      hasBreadcrumb: Bool = false
     ) -> Layout {
       let available = visibleFrame.intersection(screenFrame)
-      let width = min(536, max(0, available.width - 32))
-      let columns = width >= 380 ? 2 : 1
+      let width = min(560, max(0, available.width - 40))
+      let columns = width >= 440 ? 2 : 1
       let rows = max(1, min(6, Int(ceil(Double(itemCount) / Double(columns)))))
       let height = min(
-        max(0, available.height - 32),
-        28 + CGFloat(rows) * 37 + CGFloat(rows - 1) * 3 + (hasBreadcrumb ? 32 : 0))
-      let top = min(screenFrame.maxY - safeTop, available.maxY) - 16
-      let centeredX = screenFrame.midX - width / 2
-      let x = min(max(centeredX, available.minX + 16), available.maxX - width - 16)
+        max(0, available.height - 40),
+        24 + CGFloat(rows) * 40 + CGFloat(rows - 1) * 4 + (hasBreadcrumb ? 32 : 0))
       return Layout(
-        frame: NSRect(x: x, y: top - height, width: width, height: height),
+        frame: NSRect(
+          x: available.midX - width / 2,
+          y: available.midY - height / 2,
+          width: width,
+          height: height),
         columns: columns)
     }
   }
@@ -129,7 +130,6 @@ enum TopEdge {
       let items = controller.userState.currentGroup?.actions ?? controller.userConfig.root.actions
       let layout = Layout.make(
         screenFrame: screen.frame, visibleFrame: screen.visibleFrame,
-        safeTop: screen.safeAreaInsets.top,
         itemCount: controller.userState.isShowingRefreshState ? 0 : items.count,
         hasBreadcrumb: !controller.userState.navigationPath.isEmpty
           && !controller.userState.isShowingRefreshState)
@@ -166,7 +166,7 @@ enum TopEdge {
     var body: some View {
       VStack(spacing: 8) {
         if !userState.navigationPath.isEmpty && !userState.isShowingRefreshState {
-          breadcrumb
+          contextPath
         }
 
         ScrollView {
@@ -184,7 +184,7 @@ enum TopEdge {
             LazyVGrid(
               columns: Array(
                 repeating: GridItem(.flexible(), spacing: 22), count: presentation.columns),
-              spacing: 3
+              spacing: 4
             ) {
               ForEach(items, id: \.uiid) { item in
                 Shortcut(item: item) {
@@ -196,8 +196,8 @@ enum TopEdge {
         }
         .id(userState.navigationPath.map(\.uiid))
       }
-      .padding(.horizontal, 16)
-      .padding(.vertical, 14)
+      .padding(.horizontal, 14)
+      .padding(.vertical, 12)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background {
         if reduceTransparency {
@@ -206,29 +206,36 @@ enum TopEdge {
           VisualEffectView(material: .popover, blendingMode: .behindWindow)
         }
       }
-      .clipShape(RoundedRectangle(cornerRadius: 17, style: .continuous))
+      .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
       .animation(
         reduceMotion ? nil : .easeInOut(duration: 0.18), value: userState.navigationPath.count)
     }
 
-    private var breadcrumb: some View {
-      HStack(spacing: 8) {
-        Button(action: reset) {
-          Label("All shortcuts", systemImage: "arrow.left")
+    private var contextPath: some View {
+      Button(action: reset) {
+        HStack(spacing: 7) {
+          Image(systemName: "chevron.backward")
+            .font(.system(size: 9, weight: .semibold))
+          Text("$ keywink")
+            .foregroundStyle(.tertiary)
+          Text("/")
+            .foregroundStyle(.tertiary)
+          Text(userState.navigationPath.map(\.displayName).joined(separator: " / "))
+            .lineLimit(1)
+            .truncationMode(.head)
+          Spacer(minLength: 0)
         }
-        .buttonStyle(.plain)
-        .fixedSize()
-        .accessibilityHint("Return to the root shortcuts. You can also press Backspace.")
-        Text("/")
-        Text(userState.navigationPath.map(\.displayName).joined(separator: " / "))
-          .lineLimit(1)
-          .truncationMode(.head)
-        Spacer(minLength: 0)
+        .contentShape(Rectangle())
       }
-      .font(.system(size: 12))
+      .buttonStyle(.plain)
+      .font(.system(size: 11, weight: .medium, design: .monospaced))
       .foregroundStyle(.secondary)
-      .padding(.horizontal, 8)
+      .padding(.horizontal, 7)
       .frame(height: 24)
+      .accessibilityLabel(
+        "All shortcuts, \(userState.navigationPath.map(\.displayName).joined(separator: ", "))"
+      )
+      .accessibilityHint("Return to the root shortcuts. You can also press Backspace.")
     }
   }
 
@@ -237,30 +244,46 @@ enum TopEdge {
     let choose: () -> Void
     @State private var hovered = false
 
+    private var labelStartsWithEmoji: Bool {
+      guard
+        let first = item.item.displayName.trimmingCharacters(in: .whitespacesAndNewlines).first
+      else { return false }
+      return first.unicodeScalars.contains {
+        $0.properties.isEmojiPresentation
+          || $0.value == 0xFE0F
+          || ($0.properties.isEmoji && $0.value >= 0x1F000)
+      }
+    }
+
     var body: some View {
       Button(action: choose) {
-        HStack(spacing: 11) {
+        HStack(spacing: 9) {
           Text(KeyMaps.glyph(for: item.item.key ?? "") ?? item.item.key ?? "—")
-            .font(.system(size: 12, weight: .medium, design: .monospaced))
-            .frame(width: 24, height: 24)
-            .background(.primary.opacity(0.07), in: RoundedRectangle(cornerRadius: 5))
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .foregroundStyle(.secondary)
+            .frame(width: 25, height: 24)
+            .background(.primary.opacity(0.075), in: RoundedRectangle(cornerRadius: 6))
+          if !labelStartsWithEmoji {
+            actionIcon(item: item, iconSize: NSSize(width: 17, height: 17), loadFavicons: false)
+              .accessibilityHidden(true)
+          }
           Text(item.item.displayName)
             .font(.system(size: 13))
             .lineLimit(1)
             .truncationMode(.middle)
           Spacer(minLength: 0)
           if case .group = item {
-            Image(systemName: "chevron.right")
+            Image(systemName: "chevron.forward")
               .font(.system(size: 9, weight: .semibold))
-              .foregroundStyle(.secondary)
+              .foregroundStyle(.tertiary)
           }
         }
-        .padding(.horizontal, 8)
-        .frame(height: 37)
+        .padding(.horizontal, 7)
+        .frame(height: 40)
         .background(
-          .primary.opacity(hovered ? 0.06 : 0), in: RoundedRectangle(cornerRadius: 7)
+          .primary.opacity(hovered ? 0.065 : 0), in: RoundedRectangle(cornerRadius: 8)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 7))
+        .contentShape(RoundedRectangle(cornerRadius: 8))
       }
       .buttonStyle(.plain)
       .onHover { hovered = $0 }

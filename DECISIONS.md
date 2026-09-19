@@ -66,7 +66,7 @@ Use one continuous, softly rounded panel with the same spacing beneath the usabl
 
 ## 7. Make the launcher a compact keyboard guide
 
-Date: 2026-09-19. Status: accepted and implemented.
+Date: 2026-09-19. Status: accepted and implemented; position and visual treatment superseded by Decision 9.
 
 Niklas explicitly accepted the proposed keyboard-guide design and interactive concept with “Okay sounds good then. Let's implement that.” This settles the direction left open in Decision 6: prioritize keys and labels in two columns, remove the permanent app title/logo, close button, and instruction footer, and show a small breadcrumb only within groups. Keep native system material, a soft shadow, modest corners, and a safe gap below the menu bar and camera. Maintain the same width and top position while navigating, with brief transitions that respect reduced motion.
 
@@ -85,3 +85,17 @@ Pin KeyboardShortcuts to immutable revision [`b90d44a5809b4657cdf8bf3ee4d73a0a24
 The exact dependency revision is an implementation choice within the user-authorized fix. Revisit the pin when an upstream tagged release includes both fixes, retaining the native recording regression coverage. Hyper mapping remains the responsibility of the user's keyboard utility; recording a shortcut does not reconfigure Raycast or migrate existing Hammerspoon bindings.
 
 Verification: Debug and unsigned universal Release builds pass, as do all 52 tests and required formatting/script checks. The new native recorder regression uses in-memory shortcut storage and checks focus survival, recording Hyper+W, replacing it with Hyper+B, and Escape cancellation without touching user preferences. The rebuilt settings UI also saved both combinations on a real group. Niklas then confirmed that physical Caps Lock+W through Raycast opens the assigned group while another app is active. The temporary test binding was cleared afterward; existing Hammerspoon bindings were preserved.
+
+## 9. Center the guide and use editor-style visual hints
+
+Date: 2026-09-19. Status: accepted direction; implemented as Key Guide.
+
+Niklas reconsidered the top position in favor of the screen center, where attention already sits, and requested a developer aesthetic inspired by IDE completion lists and Helix. Keep the compact keyboard-guide interaction from Decision 7, but center it in the selected display's usable frame. Use a wide, restrained shape with monospace keys and group context, native material, app icons, SF Symbols, and emoji labels. The visible theme name becomes **Key Guide**; preserve the `topEdge` preference value so existing selections receive the revision.
+
+Use the existing native icon support instead of adding a separate SVG-rendering dependency. Leading emoji labels suppress the extra icon. Dimensions, the theme name, and icon mechanics are implementation choices within the requested direction. Preserve native light/dark appearance and reduced-motion/transparency behavior.
+
+Global group shortcuts resolve from the root even when another group is open. This supports the requested Hyper-plus-group workflow without treating a new group shortcut as a child key. The user's personal Hammerspoon migration belongs in their chezmoi dotfiles, while Keywink keeps its general JSON configuration and preference-backed shortcut schema.
+
+Run shell commands on a serial background queue so long-running actions such as selected-text speech leave the launcher responsive while preserving command order. Capture output in private temporary files to avoid pipe-buffer deadlocks, and present failures on the main thread.
+
+Verification: all 55 tests and required mise checks pass. Native root/group renders were inspected in light and dark appearances, and the running app loaded the migrated five groups and displayed the application group. Geometry coverage checks centered placement on ordinary, narrow, and offset displays; command coverage checks responsiveness, large output, and nonzero exit reporting. The final command-queue refinement also passes its focused regression. Physical use of the migrated shortcuts and custom automation remains a user trial.

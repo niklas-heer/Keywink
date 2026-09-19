@@ -31,7 +31,7 @@ enum Theme: String, Defaults.Serializable {
 
   static func name(_ value: Theme) -> String {
     switch value {
-    case .topEdge: return "Top Edge"
+    case .topEdge: return "Key Guide"
     case .mysteryBox: return "Mystery Box"
     case .mini: return "Mini"
     case .breadcrumbs: return "Breadcrumbs"

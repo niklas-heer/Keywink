@@ -132,10 +132,8 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     for groupKey in Defaults[.groupShortcuts] {
       print("Registering shortcut for \(groupKey)")
       KeyboardShortcuts.onKeyDown(for: KeyboardShortcuts.Name("group-\(groupKey)")) {
-        if !self.controller.window.isVisible {
-          self.activate()
-        }
-        self.processKeys([groupKey])
+        guard self.controller.userState.openRootGroup(for: groupKey) else { return }
+        self.show()
       }
     }
     if Defaults[.groupShortcuts].isEmpty && !KeyboardShortcuts.isEnabled(for: .activate) {
