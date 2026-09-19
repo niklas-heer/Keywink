@@ -1,48 +1,81 @@
 # Keywink
 
-A native macOS command launcher with memorable key sequences, visual hints, and a focus on easy configuration.
+A native macOS command launcher driven by memorable key sequences. Press one shortcut, then type a few letters, and Keywink opens apps, URLs, folders, or runs commands. A compact on-screen guide shows what each key does, so you never have to memorise a shortcut table.
 
-Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderKey), created by Mikkel Malmberg and its contributors. Their history and [MIT license](LICENSE) are preserved.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/key-guide-dark.png">
+    <img alt="Keywink's Key Guide showing a root group of shortcuts" src="docs/images/key-guide-light.png" width="440">
+  </picture>
+</p>
 
-## Status
+Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderKey) by Mikkel Malmberg and contributors. Their history and [MIT license](LICENSE) are preserved. Keywink has its own app identity, so it can run alongside Leader Key.
 
-Keywink has its own application identity and local build/release preparation. There is no published Keywink release yet. Builds use the `Keywink.app` name, `de.niklas-heer.Keywink` bundle identifier, and `keywink://` URL scheme. Leader Key can remain installed alongside it.
+## Why Keywink
 
-## Development
+- **Sequences instead of chords.** `o` then `m` opens Messages. Nest groups as deep as you like; the guide follows you down and Backspace takes you up one level.
+- **Key Guide.** A centered, single-column guide styled after editor completion lists: key badge first, then icon and name, with global shortcut hints on the right. Native materials, light and dark appearance, reduced motion and transparency respected.
+- **Hyper group shortcuts.** Bind a global shortcut, such as Hyper+G, straight to a group and jump into it with one press. The guide shows **✦** for Hyper (Control–Option–Shift–Command).
+- **Local usage statistics.** See which shortcuts you use from which app, and optionally rank the guide by frequency. Counts never leave your Mac.
+- **Plain JSON configuration** with a built-in editor, validation, and automatic saving.
+- **Automation** through `keywink://` URLs.
 
-Install Xcode with the macOS SDK, complete its first-launch setup, and install [mise](https://mise.jdx.dev/). Xcode provides Swift and the formatter; Swift Package Manager dependencies are locked in the project. No Homebrew packages are required to build.
+## Install
 
-```sh
-mise trust
-mise run build
-mise run test
-```
+Download the latest `Keywink-<version>.zip` from [Releases](https://github.com/niklas-heer/Keywink/releases), unzip it, and move `Keywink.app` to Applications. Keywink runs as a menu bar item.
 
-Tests use temporary configuration directories and an isolated preferences domain. `mise run format` explicitly formats source; builds do not rewrite files. See [AGENTS.md](AGENTS.md) for development guidance and [RELEASE.md](RELEASE.md) for signing, notarization, packaging, and update setup.
+> **Early releases are ad-hoc signed, not notarized.** macOS will say it cannot verify the app on first launch. Open it once, then choose **System Settings → Privacy & Security → Open Anyway**. Alternatively, clear the quarantine flag before launching:
+>
+> ```sh
+> xattr -d com.apple.quarantine /Applications/Keywink.app
+> ```
+>
+> Notarized builds will replace this as soon as Developer ID signing is set up. Verify downloads against the `.sha256` file attached to each release.
 
-## Configure
+Keywink requires macOS 13 Ventura or later and runs natively on Apple Silicon and Intel. There is no Homebrew cask yet.
 
-Open Keywink's menu bar item, choose **Settings…**, and record the shortcut that opens the launcher. Add actions or groups in the configuration editor. Then press your shortcut followed by the keys in a sequence: for example, `o`, then `m` to open Messages.
+## Quick start
 
-**Key Guide** is the default launcher theme: a compact, centered list inspired by editor completions and modal key hints. Each row starts with its key badge, followed by the icon and name. Direct Hyper shortcut hints stay on the right, within a narrower 440-point guide. **✦** means Hyper (Control–Option–Shift–Command), and **›** separates successive keys. The header shows a shortcut sequence to the current group. Top-level groups also show their direct global shortcut when one is assigned.
+1. Click the Keywink menu bar item and choose **Settings…**.
+2. Under **General**, record the shortcut that opens the launcher.
+3. Add actions and groups in the configuration editor. Each item gets a single key.
+4. Press your shortcut, then the keys. **Escape** dismisses the guide.
 
-Groups can nest to any depth. **Backspace** or the back arrow moves up one level; **Escape** dismisses. Width and center stay steady while the height follows the group, up to ten visible rows before scrolling. Brief fade and slide transitions follow the system's reduced-motion setting, and native material follows light/dark appearance and reduced transparency. Choose **Settings → General → Theme → Key Guide** to switch themes; existing Top Edge selections use Key Guide.
+Actions can be applications, URLs, folders, or shell commands.
 
-**Settings → Statistics** shows launcher opens, group views, and action selections by the application you were using when Keywink opened. Counts are stored locally; window titles, document contents, commands, and URLs are not logged. Turn off **Track usage** to pause counting or use **Reset statistics** to clear history. **Rank via frequency** is off by default. When enabled, Key Guide orders siblings by group views/action selections in the source app, falling back to overall frequency when that list has no history for the app. Ties keep configured order, shortcut keys stay fixed, and the JSON configuration is never reordered. Counts follow key paths, so reassigning an existing key inherits that path's history until reset.
+## Key Guide
 
-To open a group directly, give a top-level group a key, then use **Record Shortcut** beside that group. For example, bind Hyper+G to an applications group, release Hyper, and press T to choose its Terminal action. The separate **Shortcut** below the config list opens the root launcher. The small key button in each row sets the key used *inside* Keywink, not a global shortcut.
+<p align="center">
+  <img alt="Key Guide inside a group, with the path in the header" src="docs/images/key-guide-group-dark.png" width="440">
+</p>
 
-Group shortcuts always open their group from the root, including when another group is already open.
+The guide sits in the middle of the active display and keeps a steady width and center while its height follows the current group, up to ten rows before scrolling. The header shows the path to the current group on the left and the key sequence that reaches it on the right, where **›** means "then".
 
-Hyper combinations are displayed as their modifiers, such as **⌃⌥⇧⌘G**. If Raycast supplies Hyper, keep it running and match its **Include Shift** setting. Avoid binding a combination already owned by another launcher or keyboard utility. Configuration JSON contains the groups/actions; global activation shortcuts are saved separately in Keywink's preferences.
+- **Backspace** or the back arrow moves up one level. At the root it does nothing.
+- **Escape** hides the guide.
+- Labels that start with an emoji use it as the icon.
+- **Settings → General → Theme** switches to the other themes inherited from Leader Key. Existing "Top Edge" selections map to Key Guide.
 
-Keywink stores `config.json` in `~/Library/Application Support/Keywink/`. Preferences, shortcuts, and launch-at-login registration belong to Keywink's bundle identity. Choose a different configuration directory in Advanced settings if needed.
+## Groups and Hyper shortcuts
 
-### Import from Leader Key
+Give a top-level group a key, then use **Record Shortcut** beside it to assign a global shortcut. For example, bind Hyper+G to an applications group, release Hyper, and press `T` for Terminal. Group shortcuts always open their group from the root, even when another group is open.
 
-In **Settings → General**, choose **Import Leader Key config…** and select the existing `config.json` (normally under `~/Library/Application Support/Leader Key/`). Review the replacement confirmation. Keywink validates the file, preserves a backup of its current configuration, and copies the selected configuration into its own directory. The original file remains unchanged.
+If Raycast or another utility supplies Hyper, keep it running and match its **Include Shift** setting. Avoid binding a combination another launcher already owns. Global shortcuts are stored in Keywink's preferences, not in the JSON configuration.
 
-Only the JSON configuration is imported. Record your activation shortcut and select other preferences in Keywink. Update any `leaderkey://` automation URLs to `keywink://`. Avoid assigning both running apps the same global shortcut.
+## Usage statistics
+
+**Settings → Statistics** shows launcher opens, group views, and action selections grouped by the app you were in when Keywink opened. Window titles, document contents, commands, and URLs are never recorded.
+
+- **Track usage** pauses counting when turned off. **Reset statistics** clears history.
+- **Rank via frequency** is off by default. When on, Key Guide orders siblings by how often you use them from the current app, falling back to overall counts. Ties keep configured order, keys never change, and the JSON file is never reordered.
+
+Counts follow key paths, so reassigning a key inherits that path's history until reset.
+
+## Import from Leader Key
+
+Choose **Settings → General → Import Leader Key config…** and select the existing `config.json`, normally under `~/Library/Application Support/Leader Key/`. Keywink validates the file, backs up its current configuration, and copies the selection into its own directory. The original is left untouched.
+
+Only the JSON configuration is imported. Record your activation shortcut and preferences in Keywink, and update any `leaderkey://` automation URLs to `keywink://`. Do not give both apps the same global shortcut.
 
 ## Automation
 
@@ -60,15 +93,27 @@ open 'keywink://navigate?keys=a,b,c&execute=false'
 
 Unknown commands show the launcher. Keywink does not register or handle Leader Key's URL scheme.
 
+## Development
+
+Install Xcode with the macOS SDK, complete its first-launch setup, and install [mise](https://mise.jdx.dev/). Xcode provides Swift and the formatter; Swift Package Manager dependencies are locked in the project. No Homebrew packages are required.
+
+```sh
+mise trust
+mise run build     # unsigned Debug build
+mise run test      # isolated test suite
+mise run check     # strict lint, script syntax, and tests (what CI runs)
+mise run format    # rewrite Swift sources in place
+```
+
+Tests use temporary configuration directories and a process-private preferences domain, so they never touch your real configuration. See [AGENTS.md](AGENTS.md) for the architecture and coding guidelines, and [RELEASE.md](RELEASE.md) for signing, notarization, and packaging.
+
 ## Releases and updates
 
-Future downloads belong in [Keywink releases](https://github.com/niklas-heer/Keywink/releases). `brew install leader-key` installs the upstream app; there is no Keywink cask yet.
-
-Automatic updates remain disabled until Keywink's own HTTPS appcast and EdDSA public key are configured. The inherited upstream update feed, signing key, Apple team, and publishing workflow are removed. Local release tasks prepare artifacts; publishing is a separate step. See [RELEASE.md](RELEASE.md).
+Builds are published on [GitHub Releases](https://github.com/niklas-heer/Keywink/releases). Keywink does not check for updates yet: Sparkle stays disabled until Keywink has its own HTTPS appcast and signing key. Until then, download new versions from the releases page.
 
 ## Contributing
 
-Track work in [Keywink's issues](https://github.com/niklas-heer/Keywink/issues). The [decision records](decisions/) record the fork baseline and migration choices. Upstream fixes and editor/overlay improvements will be reviewed against a focused command-launcher scope.
+Issues and pull requests are welcome in [Keywink's issue tracker](https://github.com/niklas-heer/Keywink/issues). The [decision records](decisions/) explain the fork baseline and the choices made since; new significant choices get a record too. Upstream fixes are reviewed against a focused command-launcher scope.
 
 ## License
 
