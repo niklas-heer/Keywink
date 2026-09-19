@@ -92,6 +92,13 @@ final class TopEdgeTests: XCTestCase {
     config.ensureAndLoad()
     let state = UserState(userConfig: config)
     let controller = Controller(userState: state, userConfig: config)
+    // The accessory test host is not active by default; without activation the panel can
+    // lose key-window status to whatever app has focus, which dismisses it mid-test.
+    if #available(macOS 14.0, *) {
+      NSApp.activate()
+    } else {
+      NSApp.activate(ignoringOtherApps: true)
+    }
     settle()
     let window = try XCTUnwrap(controller.window as? TopEdge.Window)
     defer { window.orderOut(nil) }
@@ -301,13 +308,21 @@ final class TopEdgeTests: XCTestCase {
   }
 
   @MainActor
+  /// Attaches a 2x PNG render of the window content, independent of the test display's scale.
   private func attach(window: NSWindow, name: String) throws {
     let view = try XCTUnwrap(window.contentView)
-    let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+    let scale = 2
+    let bitmap = try XCTUnwrap(
+      NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: Int(view.bounds.width) * scale,
+        pixelsHigh: Int(view.bounds.height) * scale,
+        bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+        colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0))
+    bitmap.size = view.bounds.size
     view.cacheDisplay(in: view.bounds, to: bitmap)
-    let image = NSImage(size: view.bounds.size)
-    image.addRepresentation(bitmap)
-    let attachment = XCTAttachment(image: image)
+    let png = try XCTUnwrap(bitmap.representation(using: .png, properties: [:]))
+    let attachment = XCTAttachment(data: png, uniformTypeIdentifier: "public.png")
     attachment.name = name
     attachment.lifetime = .keepAlways
     add(attachment)
