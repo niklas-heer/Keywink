@@ -40,7 +40,7 @@ final class UserConfigTests: XCTestCase {
     try super.setUpWithError()
 
     // Create a unique temporary directory for each test
-    tempBaseDir = NSTemporaryDirectory().appending("/LeaderKeyTests-\(UUID().uuidString)")
+    tempBaseDir = NSTemporaryDirectory().appending("/KeywinkTests-\(UUID().uuidString)")
     try FileManager.default.createDirectory(
       atPath: tempBaseDir, withIntermediateDirectories: true)
     testDefaultDir = tempBaseDir.appending("/DefaultConfigDir")

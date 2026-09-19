@@ -1,6 +1,6 @@
 //
 //  Pulsate.swift
-//  Leader Key
+//  Keywink
 //
 //  Created by Lennart Egbers on 03.02.25.
 //
