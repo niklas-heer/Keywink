@@ -1,6 +1,5 @@
 import Cocoa
 import Defaults
-import SwiftUI
 import XCTest
 
 @testable import Leader_Key
@@ -10,10 +9,9 @@ final class TopEdgeTests: XCTestCase {
     let layout = TopEdge.Layout.make(
       screenFrame: NSRect(x: 0, y: 0, width: 1512, height: 982),
       visibleFrame: NSRect(x: 0, y: 70, width: 1512, height: 874),
-      safeTop: 38, notchWidth: 180, itemCount: 7)
+      safeTop: 38, itemCount: 7)
     XCTAssertEqual(layout.frame.midX, 756)
-    XCTAssertEqual(layout.frame.maxY, 944)
-    XCTAssertEqual(layout.neckWidth, 180)
+    XCTAssertEqual(layout.frame.maxY, 932)
     XCTAssertEqual(layout.columns, 3)
   }
 
@@ -22,20 +20,19 @@ final class TopEdgeTests: XCTestCase {
     let visible = NSRect(x: -1840, y: -200, width: 1840, height: 1055)
     let layout = TopEdge.Layout.make(
       screenFrame: screen, visibleFrame: visible,
-      safeTop: 0, notchWidth: 0, itemCount: 4)
+      safeTop: 0, itemCount: 4)
     XCTAssertEqual(layout.frame.midX, screen.midX)
-    XCTAssertEqual(layout.frame.maxY, visible.maxY - 10)
+    XCTAssertEqual(layout.frame.maxY, visible.maxY - 12)
     XCTAssertTrue(visible.contains(layout.frame))
-    XCTAssertEqual(layout.neckWidth, 0)
   }
 
   func testLongGroupsStayBoundedOnNarrowDisplays() {
     let screen = NSRect(x: 100, y: 100, width: 500, height: 700)
     let visible = NSRect(x: 100, y: 150, width: 500, height: 625)
     let small = TopEdge.Layout.make(
-      screenFrame: screen, visibleFrame: visible, safeTop: 0, notchWidth: 0, itemCount: 0)
+      screenFrame: screen, visibleFrame: visible, safeTop: 0, itemCount: 0)
     let large = TopEdge.Layout.make(
-      screenFrame: screen, visibleFrame: visible, safeTop: 0, notchWidth: 0, itemCount: 300)
+      screenFrame: screen, visibleFrame: visible, safeTop: 0, itemCount: 300)
     XCTAssertTrue(visible.contains(large.frame))
     XCTAssertEqual(large.columns, 2)
     XCTAssertGreaterThan(large.frame.height, small.frame.height)
@@ -82,8 +79,6 @@ final class TopEdgeTests: XCTestCase {
     XCTAssertLessThanOrEqual(window.frame.maxY, screen.visibleFrame.maxY)
     let rootHeight = window.frame.height
 
-    let liveContent = window.contentView
-    let liveFrame = window.frame
     for appearance in [NSAppearance.Name.aqua, .darkAqua] {
       window.appearance = NSAppearance(named: appearance)
       settle()
@@ -96,31 +91,7 @@ final class TopEdgeTests: XCTestCase {
       attachment.name = "Top Edge — \(appearance.rawValue)"
       attachment.lifetime = .keepAlways
       add(attachment)
-      // Render the same production view with a simulated camera bridge on this display.
-      let preview = TopEdge.Presentation()
-      preview.neckWidth = 180
-      let notchedView = NSHostingView(
-        rootView: TopEdge.MainView(
-          presentation: preview, choose: { _ in }, reset: {}, dismiss: {}
-        ).environmentObject(state).environmentObject(config))
-      window.contentView = notchedView
-      window.setFrame(
-        NSRect(
-          x: liveFrame.minX, y: liveFrame.minY - 14, width: liveFrame.width,
-          height: liveFrame.height + 14),
-        display: true)
-      settle()
-      let notchBitmap = try XCTUnwrap(
-        notchedView.bitmapImageRepForCachingDisplay(in: notchedView.bounds))
-      notchedView.cacheDisplay(in: notchedView.bounds, to: notchBitmap)
-      let notchImage = NSImage(size: notchedView.bounds.size)
-      notchImage.addRepresentation(notchBitmap)
-      let notchAttachment = XCTAttachment(image: notchImage)
-      notchAttachment.name = "Top Edge notch — \(appearance.rawValue)"
-      notchAttachment.lifetime = .keepAlways
-      add(notchAttachment)
-      window.contentView = liveContent
-      window.setFrame(liveFrame, display: true)
+
     }
 
     controller.handleKey("o")

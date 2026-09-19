@@ -46,7 +46,7 @@ Remove the inherited Apple team, S3 uploader, appcast workflow, Sparkle key/feed
 
 ## 5. Offer a fluid top-edge launcher
 
-Date: 2026-09-19. Status: implemented design direction; visual refinement remains open.
+Date: 2026-09-19. Status: implemented direction; the notch-bridge styling is superseded by Decision 6.
 
 Niklas disliked the centered square and proposed a top-oriented, more fluid launcher that follows the system theme and fits newer MacBook camera housings. A screenshot from another shell project served as visual inspiration, not a request to copy that project's functionality.
 
@@ -55,3 +55,11 @@ Implement **Top Edge** as the default for an unset theme preference. Keep existi
 Position against the selected display's current visible frame and camera safe-area information, including external monitors with nonzero or negative origins and side Docks. Bound the panel to that usable area. Guard animation completions so dismissing and reopening cannot close a new presentation.
 
 Verification: all 51 tests and strict formatting pass, including geometry cases and native panel presentation/navigation/dismissal, config-replacement invalidation, and rapid dismiss/reopen behavior. Light and dark renders were inspected; the notch silhouette was also rendered with simulated camera geometry. This does not claim an end-to-end check on every physical notch/display configuration.
+
+## 6. Remove the notch connector and outlined edges
+
+Date: 2026-09-19. Status: revised implementation following visual feedback.
+
+Niklas rejected the short stem above the larger panel, described the edges as etched, and found the result awkward on both notched and ordinary displays. This supersedes Decision 5's decorative camera bridge.
+
+Use one continuous, softly rounded panel with the same spacing beneath the usable top edge on every display. The notch affects safe placement only; it does not change the silhouette. Remove the custom contour and border stroke, shorten the header/rows, and show row backgrounds only on hover. Keep native system materials, accessibility settings, keyboard navigation, and bounded resizing. The precise revised proportions remain open to visual feedback.
