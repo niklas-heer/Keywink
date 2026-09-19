@@ -272,7 +272,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 427C180C2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Leader Key" */;
 			buildPhases = (
-				42D6FF682DA513A400C8257C /* Format */,
 				427C17E32BD311B400955B98 /* Sources */,
 				427C17E42BD311B400955B98 /* Frameworks */,
 				427C17E52BD311B400955B98 /* Resources */,
@@ -280,7 +279,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				4236321E2D6799C600878D92 /* PBXTargetDependency */,
 			);
 			name = "Leader Key";
 			packageProductDependencies = (
@@ -348,7 +346,6 @@
 				427C18212BD31DF100955B98 /* XCRemoteSwiftPackageReference "Settings" */,
 				4279AFE92C6A070300952A83 /* XCRemoteSwiftPackageReference "Sparkle" */,
 				4279AFEB2C6A175500952A83 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
-				4236321C2D6799B900878D92 /* XCRemoteSwiftPackageReference "SwiftFormatPlugins" */,
 				115AA5C02DA5463700C17E18 /* XCRemoteSwiftPackageReference "SymbolPicker" */,
 				FB00D5262D824E2C00A37486 /* XCRemoteSwiftPackageReference "Kingfisher" */,
 			);
@@ -381,28 +378,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		42D6FF682DA513A400C8257C /* Format */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = Format;
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n/usr/bin/swift format -r -i .\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		427C17E32BD311B400955B98 /* Sources */ = {
@@ -460,10 +435,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4236321E2D6799C600878D92 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			productRef = 4236321D2D6799C600878D92 /* Lint */;
-		};
 		427C17FA2BD311B500955B98 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 427C17E62BD311B400955B98 /* Leader Key */;
@@ -745,14 +716,6 @@
 				minimumVersion = 1.6.2;
 			};
 		};
-		4236321C2D6799B900878D92 /* XCRemoteSwiftPackageReference "SwiftFormatPlugins" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/StarLard/SwiftFormatPlugins.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.1.1;
-			};
-		};
 		4279AFE92C6A070300952A83 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -808,11 +771,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 115AA5C02DA5463700C17E18 /* XCRemoteSwiftPackageReference "SymbolPicker" */;
 			productName = SymbolPicker;
-		};
-		4236321D2D6799C600878D92 /* Lint */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4236321C2D6799B900878D92 /* XCRemoteSwiftPackageReference "SwiftFormatPlugins" */;
-			productName = "plugin:Lint";
 		};
 		4279AFEC2C6A175500952A83 /* LaunchAtLogin */ = {
 			isa = XCSwiftPackageProductDependency;

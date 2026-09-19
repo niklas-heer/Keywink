@@ -20,6 +20,9 @@ class UserConfig: ObservableObject {
   let fileName = "config.json"
   private let alertHandler: AlertHandler
   private let fileManager: FileManager
+  private let defaultDirectoryResolver: () -> String
+  private let configDirectoryReader: () -> String
+  private let configDirectoryWriter: (String) -> Void
   private var lastReadChecksum: String?
   private var isLoading = false
   private let configIOQueue = DispatchQueue(label: "ConfigIO", qos: .userInitiated)
@@ -27,10 +30,16 @@ class UserConfig: ObservableObject {
 
   init(
     alertHandler: AlertHandler = DefaultAlertHandler(),
-    fileManager: FileManager = .default
+    fileManager: FileManager = .default,
+    defaultDirectoryResolver: @escaping () -> String = UserConfig.defaultDirectory,
+    configDirectoryReader: @escaping () -> String = { Defaults[.configDir] },
+    configDirectoryWriter: @escaping (String) -> Void = { Defaults[.configDir] = $0 }
   ) {
     self.alertHandler = alertHandler
     self.fileManager = fileManager
+    self.defaultDirectoryResolver = defaultDirectoryResolver
+    self.configDirectoryReader = configDirectoryReader
+    self.configDirectoryWriter = configDirectoryWriter
   }
 
   // MARK: - Public Interface
@@ -179,6 +188,16 @@ class UserConfig: ObservableObject {
   // MARK: - Directory Management
 
   static func defaultDirectory() -> String {
+    if let testConfigDirectory = RuntimeEnvironment.testConfigDirectory {
+      do {
+        try FileManager.default.createDirectory(
+          atPath: testConfigDirectory, withIntermediateDirectories: true)
+      } catch {
+        fatalError("Failed to create test config directory: \(error)")
+      }
+      return testConfigDirectory
+    }
+
     let appSupportDir = FileManager.default.urls(
       for: .applicationSupportDirectory, in: .userDomainMask)[0]
     let path = (appSupportDir.path as NSString).appendingPathComponent(
@@ -193,8 +212,8 @@ class UserConfig: ObservableObject {
   }
 
   private func ensureValidConfigDirectory() {
-    let dir = Defaults[.configDir]
-    let defaultDir = Self.defaultDirectory()
+    let dir = configDirectoryReader()
+    let defaultDir = defaultDirectoryResolver()
 
     if !fileManager.fileExists(atPath: dir) {
       alertHandler.showAlert(
@@ -202,14 +221,14 @@ class UserConfig: ObservableObject {
         message:
           "Config directory does not exist: \(dir)\nResetting to default location."
       )
-      Defaults[.configDir] = defaultDir
+      configDirectoryWriter(defaultDir)
     }
   }
 
   // MARK: - File Operations
 
   var path: String {
-    (Defaults[.configDir] as NSString).appendingPathComponent(fileName)
+    (configDirectoryReader() as NSString).appendingPathComponent(fileName)
   }
 
   var url: URL {

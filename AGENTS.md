@@ -42,7 +42,7 @@ Leader Key is a macOS application that provides customizable keyboard shortcuts.
 **Testing Architecture:**
 
 - Uses XCTest with custom `TestAlertManager` for UI testing
-- Some tests use isolated UserDefaults and temporary directories, but isolation is incomplete. `UserConfigTests.testCreatesDefaultConfigDirIfNotExists` deletes `UserConfig.defaultDirectory()`, currently the real user's `~/Library/Application Support/Leader Key` directory. Other tests also write to that default path. Fix path injection/isolation before running the inherited suite on a normal user account; until then use a disposable macOS account or runner. See upstream [PR 313](https://github.com/mikker/LeaderKey/pull/313) as a review candidate, not a verified fix.
+- Tests use a process-private UserDefaults suite and temporary default configuration directory. Configuration fixtures inject their own directory accessors and fallback path; never delete or write the real user configuration directory in tests. App and updater startup are suppressed in the test host. Keep this isolation when adding tests.
 - Focus on configuration validation and state management
 
 ## Code Style Guidelines

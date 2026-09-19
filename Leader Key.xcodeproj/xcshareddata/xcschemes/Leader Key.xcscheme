@@ -30,9 +30,6 @@
       shouldUseLaunchSchemeArgsEnv = "YES">
       <TestPlans>
          <TestPlanReference
-            reference = "container:Leader Key.xctestplan">
-         </TestPlanReference>
-         <TestPlanReference
             reference = "container:Leader Key/Support/TestPlan.xctestplan"
             default = "YES">
          </TestPlanReference>
@@ -46,17 +43,6 @@
                BlueprintIdentifier = "427C17F72BD311B500955B98"
                BuildableName = "Leader KeyTests.xctest"
                BlueprintName = "Leader KeyTests"
-               ReferencedContainer = "container:Leader Key.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "427C18012BD311B500955B98"
-               BuildableName = "Leader KeyUITests.xctest"
-               BlueprintName = "Leader KeyUITests"
                ReferencedContainer = "container:Leader Key.xcodeproj">
             </BuildableReference>
          </TestableReference>

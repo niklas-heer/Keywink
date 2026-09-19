@@ -9,10 +9,12 @@ class KeyboardLayoutTests: XCTestCase {
   var cancellables: Set<AnyCancellable>!
   var userState: UserState!
   var userConfig: UserConfig!
+  var originalForceEnglishKeyboardLayout: Bool!
 
   override func setUp() {
     super.setUp()
     cancellables = Set<AnyCancellable>()
+    originalForceEnglishKeyboardLayout = Defaults[.forceEnglishKeyboardLayout]
 
     // Create test instances
     userConfig = UserConfig()
@@ -24,6 +26,7 @@ class KeyboardLayoutTests: XCTestCase {
   }
 
   override func tearDown() {
+    Defaults[.forceEnglishKeyboardLayout] = originalForceEnglishKeyboardLayout
     cancellables = nil
     controller = nil
     userState = nil

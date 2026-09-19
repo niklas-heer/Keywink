@@ -20,7 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate,
   let config = UserConfig()
 
   var state: UserState!
-  @IBOutlet var updaterController: SPUStandardUpdaterController!
+  private var updaterController: SPUStandardUpdaterController?
 
   lazy var settingsWindowController = SettingsWindowController(
     panes: [
@@ -46,6 +46,9 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     else { return }
     guard !isRunningTests() else { return }
 
+    updaterController = SPUStandardUpdaterController(
+      startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self)
+
     UNUserNotificationCenter.current().delegate = self
 
     NSApp.mainMenu = MainMenu()
@@ -67,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate,
       NSWorkspace.shared.activateFileViewerSelecting([self.config.url])
     }
     statusItem.handleCheckForUpdates = {
-      self.updaterController.checkForUpdates(nil)
+      self.updaterController?.checkForUpdates(nil)
     }
 
     Task {
@@ -201,15 +204,13 @@ class AppDelegate: NSObject, NSApplicationDelegate,
       == updateLocationIdentifier
       && response.actionIdentifier == UNNotificationDefaultActionIdentifier
     {
-      updaterController.checkForUpdates(nil)
+      updaterController?.checkForUpdates(nil)
     }
     completionHandler()
   }
 
   func isRunningTests() -> Bool {
-    let environment = ProcessInfo.processInfo.environment
-    guard environment["XCTestSessionIdentifier"] != nil else { return false }
-    return true
+    RuntimeEnvironment.isRunningTests
   }
 
   // MARK: - URL Scheme Handling

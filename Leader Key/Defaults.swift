@@ -1,10 +1,41 @@
 import Cocoa
 import Defaults
 
-var defaultsSuite =
-  ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-  ? UserDefaults(suiteName: UUID().uuidString)!
-  : .standard
+enum RuntimeEnvironment {
+  static var isRunningTests: Bool {
+    isRunningTests(
+      environment: ProcessInfo.processInfo.environment,
+      hasXCTestCaseClass: NSClassFromString("XCTestCase") != nil)
+  }
+
+  static func isRunningTests(
+    environment: [String: String], hasXCTestCaseClass: Bool
+  ) -> Bool {
+    environment["XCTestConfigurationFilePath"] != nil
+      || environment["XCTestSessionIdentifier"] != nil
+      || hasXCTestCaseClass
+  }
+
+  static let testConfigDirectory: String? = {
+    guard isRunningTests else { return nil }
+
+    return FileManager.default.temporaryDirectory
+      .appendingPathComponent(
+        "LeaderKeyTests-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)",
+        isDirectory: true
+      )
+      .path
+  }()
+}
+
+let defaultsSuite: UserDefaults = {
+  guard RuntimeEnvironment.isRunningTests else { return .standard }
+
+  return UserDefaults(
+    suiteName:
+      "com.brnbw.Leader-KeyTests-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)"
+  )!
+}()
 
 extension Defaults.Keys {
   static let configDir = Key<String>(
