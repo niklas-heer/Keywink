@@ -11,8 +11,9 @@ final class TopEdgeTests: XCTestCase {
       visibleFrame: NSRect(x: 0, y: 70, width: 1512, height: 874),
       safeTop: 38, itemCount: 7)
     XCTAssertEqual(layout.frame.midX, 756)
-    XCTAssertEqual(layout.frame.maxY, 932)
-    XCTAssertEqual(layout.columns, 3)
+    XCTAssertEqual(layout.frame.width, 536)
+    XCTAssertEqual(layout.frame.maxY, 928)
+    XCTAssertEqual(layout.columns, 2)
   }
 
   func testExternalDisplayRespectsNegativeCoordinatesAndDock() {
@@ -22,7 +23,7 @@ final class TopEdgeTests: XCTestCase {
       screenFrame: screen, visibleFrame: visible,
       safeTop: 0, itemCount: 4)
     XCTAssertEqual(layout.frame.midX, screen.midX)
-    XCTAssertEqual(layout.frame.maxY, visible.maxY - 12)
+    XCTAssertEqual(layout.frame.maxY, visible.maxY - 16)
     XCTAssertTrue(visible.contains(layout.frame))
   }
 
@@ -32,11 +33,12 @@ final class TopEdgeTests: XCTestCase {
     let small = TopEdge.Layout.make(
       screenFrame: screen, visibleFrame: visible, safeTop: 0, itemCount: 0)
     let large = TopEdge.Layout.make(
-      screenFrame: screen, visibleFrame: visible, safeTop: 0, itemCount: 300)
+      screenFrame: screen, visibleFrame: visible, safeTop: 0, itemCount: 300,
+      hasBreadcrumb: true)
     XCTAssertTrue(visible.contains(large.frame))
     XCTAssertEqual(large.columns, 2)
     XCTAssertGreaterThan(large.frame.height, small.frame.height)
-    XCTAssertLessThan(large.frame.height, 300)
+    XCTAssertEqual(large.frame.height, 297)
     XCTAssertEqual(large.frame.maxY, small.frame.maxY)
   }
 
@@ -77,28 +79,47 @@ final class TopEdgeTests: XCTestCase {
     wait(for: [shown], timeout: 2)
     XCTAssertTrue(window.isVisible)
     XCTAssertLessThanOrEqual(window.frame.maxY, screen.visibleFrame.maxY)
+    XCTAssertEqual(window.frame.width, 536)
+    let rootWidth = window.frame.width
+    let rootMaxY = window.frame.maxY
     let rootHeight = window.frame.height
 
     for appearance in [NSAppearance.Name.aqua, .darkAqua] {
       window.appearance = NSAppearance(named: appearance)
       settle()
-      let view = try XCTUnwrap(window.contentView)
-      let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
-      view.cacheDisplay(in: view.bounds, to: bitmap)
-      let image = NSImage(size: view.bounds.size)
-      image.addRepresentation(bitmap)
-      let attachment = XCTAttachment(image: image)
-      attachment.name = "Top Edge — \(appearance.rawValue)"
-      attachment.lifetime = .keepAlways
-      add(attachment)
-
+      try attach(window: window, name: "Top Edge — Root — \(appearance.rawValue)")
     }
 
     controller.handleKey("o")
     settle()
     XCTAssertEqual(state.currentGroup?.label, "Open")
     XCTAssertLessThan(window.frame.height, rootHeight)
-    XCTAssertLessThanOrEqual(window.frame.maxY, screen.visibleFrame.maxY)
+    XCTAssertEqual(window.frame.width, rootWidth)
+    XCTAssertEqual(window.frame.maxY, rootMaxY)
+
+    for appearance in [NSAppearance.Name.aqua, .darkAqua] {
+      window.appearance = NSAppearance(named: appearance)
+      settle()
+      try attach(window: window, name: "Top Edge — Group — \(appearance.rawValue)")
+    }
+
+    let backspace = try XCTUnwrap(
+      NSEvent.keyEvent(
+        with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+        windowNumber: window.windowNumber, context: nil, characters: "",
+        charactersIgnoringModifiers: "", isARepeat: false,
+        keyCode: KeyHelpers.backspace.rawValue))
+    controller.keyDown(with: backspace)
+    settle()
+    XCTAssertTrue(state.navigationPath.isEmpty)
+    XCTAssertNil(state.currentGroup)
+    XCTAssertEqual(window.frame.width, rootWidth)
+    XCTAssertEqual(window.frame.maxY, rootMaxY)
+    XCTAssertEqual(window.frame.height, rootHeight)
+
+    controller.handleKey("o")
+    settle()
+    XCTAssertEqual(state.currentGroup?.label, "Open")
     // A config edit must invalidate the stored Group value, both visually and for execution.
     config.root = Group(key: nil, actions: [])
     settle()
@@ -124,5 +145,18 @@ final class TopEdgeTests: XCTestCase {
     let settled = expectation(description: "UI settled")
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { settled.fulfill() }
     wait(for: [settled], timeout: 2)
+  }
+
+  @MainActor
+  private func attach(window: NSWindow, name: String) throws {
+    let view = try XCTUnwrap(window.contentView)
+    let bitmap = try XCTUnwrap(view.bitmapImageRepForCachingDisplay(in: view.bounds))
+    view.cacheDisplay(in: view.bounds, to: bitmap)
+    let image = NSImage(size: view.bounds.size)
+    image.addRepresentation(bitmap)
+    let attachment = XCTAttachment(image: image)
+    attachment.name = name
+    attachment.lifetime = .keepAlways
+    add(attachment)
   }
 }
