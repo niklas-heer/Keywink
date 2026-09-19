@@ -62,7 +62,19 @@ The Xcode project and scheme keep the inherited `Leader Key` name for now. The s
 
    `mise run archive` is available when you only want to inspect a signed archive. It writes the same default archive path, so move or remove that standalone archive before running `mise run release`; the release task always creates a fresh archive and refuses to reuse an existing one.
 
-4. Create a GitHub release for the matching signed tag, attach the ZIP and checksum, and write release notes. This is a deliberate manual step; the local task does not create a tag, commit, push, or publish a release.
+4. Tag the released commit, push the tag, and create a GitHub release with the ZIP, checksum, and release notes. This is a deliberate manual step; the local task does not create a tag, commit, push, or publish a release.
+
+   ```sh
+   git tag -a v0.1.0 -m "Keywink 0.1.0"
+   git push origin v0.1.0
+   gh release create v0.1.0 \
+     build/release/artifacts/Keywink-0.1.0-1.zip \
+     build/release/artifacts/Keywink-0.1.0-1.zip.sha256 \
+     --title "Keywink 0.1.0" \
+     --notes-file build/release/notes-0.1.0.md
+   ```
+
+   The fork still carries the inherited upstream `v1.x` tags. GitHub marks the most recently created release as latest, so the lower Keywink version numbers do not affect which release is shown first.
 
 ## Sparkle updates
 
