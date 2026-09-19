@@ -70,7 +70,7 @@ Automatic updates remain disabled until Keywink's own HTTPS appcast and EdDSA pu
 
 ## Contributing
 
-Track work in [Keywink's issues](https://github.com/niklas-heer/Keywink/issues). [DECISIONS.md](DECISIONS.md) records the fork baseline and migration choices. Upstream fixes and editor/overlay improvements will be reviewed against a focused command-launcher scope.
+Track work in [Keywink's issues](https://github.com/niklas-heer/Keywink/issues). The [decision records](decisions/) record the fork baseline and migration choices. Upstream fixes and editor/overlay improvements will be reviewed against a focused command-launcher scope.
 
 ## License
 

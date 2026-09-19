@@ -4,7 +4,7 @@ This file provides guidance to coding agents when working with code in this repo
 
 # Keywink Development Guide
 
-Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [DECISIONS.md](DECISIONS.md) for the accepted identity and upstream baseline. The installed app is Keywink; the Xcode project, scheme, source paths, and Swift module retain Leader Key names. See [RELEASE.md](RELEASE.md) for the local release process and external signing prerequisites.
+Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [decision records](decisions/) for the accepted identity and upstream baseline. The installed app is Keywink; the Xcode project, scheme, source paths, and Swift module retain Leader Key names. See [RELEASE.md](RELEASE.md) for the local release process and external signing prerequisites.
 
 ## Build & Test Commands
 
