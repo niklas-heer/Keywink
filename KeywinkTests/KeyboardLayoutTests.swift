@@ -165,8 +165,6 @@ final class ShortcutRecorderTests: XCTestCase {
       defer: false)
     window.isReleasedWhenClosed = false
     window.contentView = stackView
-    let originalPolicy = NSApp.activationPolicy()
-    NSApp.setActivationPolicy(.regular)
     if #available(macOS 14.0, *) {
       NSApp.activate()
     } else {
@@ -175,10 +173,7 @@ final class ShortcutRecorderTests: XCTestCase {
     window.makeKeyAndOrderFront(nil)
     window.layoutIfNeeded()
     drainMainRunLoop()
-    defer {
-      window.close()
-      NSApp.setActivationPolicy(originalPolicy)
-    }
+    defer { window.close() }
 
     let inactivePlaceholder = recorder.placeholderString
 

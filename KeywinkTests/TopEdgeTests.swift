@@ -120,12 +120,15 @@ final class TopEdgeTests: XCTestCase {
     }
 
     controller.handleKey("o")
-    settle()
+    let openLayout = TopEdge.Layout.make(
+      screenFrame: screen.frame, visibleFrame: screen.visibleFrame,
+      itemCount: state.currentGroup?.actions.count ?? 0)
+    waitUntilFrame(window, matches: openLayout.frame)
     XCTAssertEqual(state.currentGroup?.label, "Open")
     XCTAssertLessThan(window.frame.height, rootHeight)
     XCTAssertEqual(window.frame.width, rootWidth)
-    XCTAssertEqual(window.frame.midX, rootCenter.x, accuracy: 0.5)
-    XCTAssertEqual(window.frame.midY, rootCenter.y, accuracy: 0.5)
+    XCTAssertEqual(window.frame.midX, openLayout.frame.midX, accuracy: 0.5)
+    XCTAssertEqual(window.frame.midY, openLayout.frame.midY, accuracy: 0.5)
 
     for appearance in [NSAppearance.Name.aqua, .darkAqua] {
       window.appearance = NSAppearance(named: appearance)
@@ -148,13 +151,16 @@ final class TopEdgeTests: XCTestCase {
     controller.keyDown(with: backspace)
     XCTAssertEqual(state.keyPath, ["o"])
     controller.keyDown(with: backspace)
-    settle()
+    let rootLayout = TopEdge.Layout.make(
+      screenFrame: screen.frame, visibleFrame: screen.visibleFrame,
+      itemCount: config.root.actions.count)
+    waitUntilFrame(window, matches: rootLayout.frame)
     XCTAssertTrue(state.navigationPath.isEmpty)
     XCTAssertNil(state.currentGroup)
     XCTAssertEqual(window.frame.width, rootWidth)
-    XCTAssertEqual(window.frame.midX, rootCenter.x, accuracy: 0.5)
-    XCTAssertEqual(window.frame.midY, rootCenter.y, accuracy: 0.5)
-    XCTAssertEqual(window.frame.height, rootHeight)
+    XCTAssertEqual(window.frame.midX, rootLayout.frame.midX, accuracy: 0.5)
+    XCTAssertEqual(window.frame.midY, rootLayout.frame.midY, accuracy: 0.5)
+    XCTAssertEqual(window.frame.height, rootLayout.frame.height, accuracy: 0.5)
 
     controller.keyDown(with: backspace)
     XCTAssertTrue(state.navigationPath.isEmpty, "Backspace at the root is harmless")
@@ -305,6 +311,23 @@ final class TopEdgeTests: XCTestCase {
     let settled = expectation(description: "UI settled")
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { settled.fulfill() }
     wait(for: [settled], timeout: 2)
+  }
+
+  private func waitUntilFrame(_ window: NSWindow, matches expected: NSRect) {
+    let deadline = Date().addingTimeInterval(2)
+    while Date() < deadline {
+      let frame = window.frame
+      if abs(frame.midX - expected.midX) <= 0.5
+        && abs(frame.midY - expected.midY) <= 0.5
+        && abs(frame.width - expected.width) <= 0.5
+        && abs(frame.height - expected.height) <= 0.5
+      {
+        return
+      }
+      let step = expectation(description: "frame closer to layout")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { step.fulfill() }
+      wait(for: [step], timeout: 0.2)
+    }
   }
 
   @MainActor
