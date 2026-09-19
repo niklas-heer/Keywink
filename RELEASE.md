@@ -76,6 +76,23 @@ The Xcode project, scheme, and targets are named `Keywink`. The shipped product 
 
    The fork still carries the inherited upstream `v1.x` tags. GitHub marks the most recently created release as latest, so the lower Keywink version numbers do not affect which release is shown first.
 
+## Interim ad-hoc releases
+
+Until a Developer ID certificate and notary profile are available, `mise run release-adhoc` packages an ad-hoc signed build:
+
+```text
+build/release/artifacts/Keywink-<version>-<build>-adhoc.zip
+build/release/artifacts/Keywink-<version>-<build>-adhoc.zip.sha256
+```
+
+The `-adhoc` suffix marks the artifact as not notarized. macOS blocks such apps on first launch with "Apple could not verify". The user opens the app once, then approves it in **System Settings → Privacy & Security → Open Anyway**, or removes the quarantine attribute before launching:
+
+```sh
+xattr -d com.apple.quarantine /Applications/Keywink.app
+```
+
+State this clearly in the release notes. Replace ad-hoc artifacts with notarized ones as soon as signing works; do not enable Sparkle for ad-hoc builds.
+
 ## Sparkle updates
 
 The app updater remains disabled until both `KEYWINK_UPDATE_FEED_URL` and `KEYWINK_UPDATE_PUBLIC_KEY` are configured at build time. The feed URL must use HTTPS, and the public key must be the valid base64-encoded 32-byte Ed25519 key generated for Keywink.

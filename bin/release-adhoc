@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Package an ad-hoc signed, non-notarized Keywink build for a GitHub release.
+# Use this only until Developer ID signing and notarization are available;
+# macOS asks the user to approve the app in Privacy & Security on first launch.
+set -euo pipefail
+
+repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$repo_root"
+
+archive_path=${KEYWINK_ARCHIVE_PATH:-build/release/Keywink-adhoc.xcarchive}
+artifact_dir=${KEYWINK_ARTIFACT_DIR:-build/release/artifacts}
+
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "Tracked files must be clean before preparing a release." >&2
+  exit 65
+fi
+
+if [[ -e $archive_path ]]; then
+  echo "Archive already exists: $archive_path" >&2
+  echo "Move or remove it before creating a new release archive." >&2
+  exit 73
+fi
+
+mkdir -p "$(dirname "$archive_path")"
+
+xcodebuild archive \
+  -project "Keywink.xcodeproj" \
+  -scheme "Keywink" \
+  -configuration Release \
+  -destination "generic/platform=macOS" \
+  -archivePath "$archive_path" \
+  CODE_SIGN_STYLE=Manual \
+  CODE_SIGN_IDENTITY="-" \
+  DEVELOPMENT_TEAM="" \
+  KEYWINK_UPDATE_FEED_URL="" \
+  KEYWINK_UPDATE_PUBLIC_KEY=""
+
+app_path="$archive_path/Products/Applications/Keywink.app"
+if [[ ! -d $app_path ]]; then
+  echo "Archive did not produce $app_path" >&2
+  exit 66
+fi
+
+bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$app_path/Contents/Info.plist")
+if [[ $bundle_id != de.niklas-heer.Keywink ]]; then
+  echo "Expected bundle identifier de.niklas-heer.Keywink, got $bundle_id" >&2
+  exit 65
+fi
+
+codesign --verify --deep --strict --verbose=2 "$app_path"
+
+version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$app_path/Contents/Info.plist")
+build=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$app_path/Contents/Info.plist")
+if [[ ! $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ || ! $build =~ ^[1-9][0-9]*$ ]]; then
+  echo "Refusing to package invalid version $version ($build)." >&2
+  exit 65
+fi
+artifact="$artifact_dir/Keywink-$version-$build-adhoc.zip"
+
+mkdir -p "$artifact_dir"
+if [[ -e $artifact || -e $artifact.sha256 ]]; then
+  echo "Release artifact already exists for $version ($build) in $artifact_dir" >&2
+  exit 73
+fi
+
+ditto -c -k --sequesterRsrc --keepParent "$app_path" "$artifact"
+(cd "$artifact_dir" && shasum -a 256 "$(basename "$artifact")" > "$(basename "$artifact").sha256")
+
+echo "Prepared ad-hoc signed (not notarized) release artifacts:"
+echo "  $artifact"
+echo "  $artifact.sha256"
+echo "Users must approve the app in System Settings > Privacy & Security on first launch."

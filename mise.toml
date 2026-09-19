@@ -40,7 +40,7 @@ xcrun swift-format lint --strict --recursive \
 
 [tasks.scripts]
 description = "Check release-script syntax"
-run = "bash -n bin/archive bin/bump bin/release"
+run = "bash -n bin/archive bin/bump bin/release bin/release-adhoc"
 
 [tasks.check]
 description = "Run formatting, script checks, and the native test suite"
@@ -53,3 +53,7 @@ run = "bin/archive"
 [tasks.release]
 description = "Export, notarize, and package a local GitHub release artifact"
 run = "bin/release"
+
+[tasks.release-adhoc]
+description = "Package an ad-hoc signed, non-notarized build (interim, until Developer ID signing is available)"
+run = "bin/release-adhoc"
