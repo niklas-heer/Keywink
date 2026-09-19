@@ -1,3 +1,5 @@
+# Distinct from upstream ci.yml. GitHub disables inherited fork workflows;
+# a new path registers a workflow that can run on push, not only dispatch.
 name: CI
 
 on:
