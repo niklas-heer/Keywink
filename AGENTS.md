@@ -4,14 +4,14 @@ This file provides guidance to coding agents when working with code in this repo
 
 # Keywink Development Guide
 
-Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [decision records](decisions/) for the accepted identity and upstream baseline. The installed app is Keywink; the Xcode project, scheme, source paths, and Swift module retain Leader Key names. See [RELEASE.md](RELEASE.md) for the local release process and external signing prerequisites.
+Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fork status and [decision records](decisions/) for the accepted identity and upstream baseline. The Xcode project, scheme, targets, source directories, and Swift module are all named Keywink. See [RELEASE.md](RELEASE.md) for the local release process and external signing prerequisites.
 
 ## Build & Test Commands
 
 - Build: `mise run build`
 - Run all tests: `mise run test`
 - Run required checks: `mise run check` (strict formatting, native tests, and script syntax)
-- Run single test: `xcodebuild -scheme "Leader Key" -testPlan "TestPlan" '-only-testing:Leader KeyTests/UserConfigTests/testInitializesWithDefaults' -derivedDataPath build CODE_SIGNING_ALLOWED=NO test`
+- Run single test: `xcodebuild -scheme "Keywink" -testPlan "TestPlan" '-only-testing:KeywinkTests/UserConfigTests/testInitializesWithDefaults' -derivedDataPath build CODE_SIGNING_ALLOWED=NO test`
 - Format source explicitly: `mise run format` (builds never rewrite source)
 - Set release version: `bin/bump <marketing-version> <build-number>`
 - Prepare signed, notarized artifacts: `mise run release` (requires the configuration in RELEASE.md; does not publish)

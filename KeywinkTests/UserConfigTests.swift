@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Leader_Key
+@testable import Keywink
 
 class TestAlertManager: AlertHandler {
   var shownAlerts: [(style: NSAlert.Style, message: String)] = []

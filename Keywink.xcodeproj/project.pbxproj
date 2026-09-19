@@ -68,7 +68,7 @@
 			containerPortal = 427C17DF2BD311B400955B98 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 427C17E62BD311B400955B98;
-			remoteInfo = "Leader Key";
+			remoteInfo = "Keywink";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -89,12 +89,12 @@
 		EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeTests.swift; sourceTree = "<group>"; };
 		4254953F2D75EFAD0020300E /* ForTheHorde.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForTheHorde.swift; sourceTree = "<group>"; };
 		426E625A2D2E6A98009FD2F2 /* CommandRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRunner.swift; sourceTree = "<group>"; };
-		4279AFEA2C6A08B100952A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "Leader Key/Support/Info.plist"; sourceTree = SOURCE_ROOT; };
+		4279AFEA2C6A08B100952A83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "Keywink/Support/Info.plist"; sourceTree = SOURCE_ROOT; };
 		427C17E72BD311B400955B98 /* Keywink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Keywink.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		427C17EE2BD311B500955B98 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		427C17F12BD311B500955B98 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		427C17F32BD311B500955B98 /* Leader_Key.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Leader_Key.entitlements; sourceTree = "<group>"; };
-		427C17F82BD311B500955B98 /* Leader KeyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Leader KeyTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		427C17F32BD311B500955B98 /* Keywink.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Keywink.entitlements; sourceTree = "<group>"; };
+		427C17F82BD311B500955B98 /* KeywinkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "KeywinkTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		427C17FC2BD311B500955B98 /* UserConfigTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserConfigTests.swift; sourceTree = "<group>"; };
 		427C181B2BD314B500955B98 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		427C181F2BD31C3D00955B98 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -177,8 +177,8 @@
 		427C17DE2BD311B400955B98 = {
 			isa = PBXGroup;
 			children = (
-				427C17E92BD311B400955B98 /* Leader Key */,
-				427C17FB2BD311B500955B98 /* Leader KeyTests */,
+				427C17E92BD311B400955B98 /* Keywink */,
+				427C17FB2BD311B500955B98 /* KeywinkTests */,
 				427C17E82BD311B400955B98 /* Products */,
 				42E70A552C823FF200FCF902 /* Frameworks */,
 			);
@@ -188,12 +188,12 @@
 			isa = PBXGroup;
 			children = (
 				427C17E72BD311B400955B98 /* Keywink.app */,
-				427C17F82BD311B500955B98 /* Leader KeyTests.xctest */,
+				427C17F82BD311B500955B98 /* KeywinkTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		427C17E92BD311B400955B98 /* Leader Key */ = {
+		427C17E92BD311B400955B98 /* Keywink */ = {
 			isa = PBXGroup;
 			children = (
 				42B21FBB2D67566100F4A2C7 /* Alerts.swift */,
@@ -223,7 +223,7 @@
 				423632232D68CB0F00878D92 /* Themes */,
 				427C18392BD3268000955B98 /* Views */,
 			);
-			path = "Leader Key";
+			path = "Keywink";
 			sourceTree = "<group>";
 		};
 		427C17F02BD311B500955B98 /* Preview Content */ = {
@@ -234,7 +234,7 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		427C17FB2BD311B500955B98 /* Leader KeyTests */ = {
+		427C17FB2BD311B500955B98 /* KeywinkTests */ = {
 			isa = PBXGroup;
 			children = (
 				A01A01A01A01A01A01A01004 /* TopEdgeTests.swift */,
@@ -244,7 +244,7 @@
 				427C17FC2BD311B500955B98 /* UserConfigTests.swift */,
 				A01A01A01A01A01A01A02004 /* UsageStatisticsTests.swift */,
 			);
-			path = "Leader KeyTests";
+			path = "KeywinkTests";
 			sourceTree = "<group>";
 		};
 		427C18362BD3243C00955B98 /* Support */ = {
@@ -253,7 +253,7 @@
 				4279AFEA2C6A08B100952A83 /* Info.plist */,
 				423632142D678F4400878D92 /* TestPlan.xctestplan */,
 				427C17F02BD311B500955B98 /* Preview Content */,
-				427C17F32BD311B500955B98 /* Leader_Key.entitlements */,
+				427C17F32BD311B500955B98 /* Keywink.entitlements */,
 				427C18342BD3232200955B98 /* Main.storyboard */,
 			);
 			path = Support;
@@ -283,9 +283,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		427C17E62BD311B400955B98 /* Leader Key */ = {
+		427C17E62BD311B400955B98 /* Keywink */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 427C180C2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Leader Key" */;
+			buildConfigurationList = 427C180C2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Keywink" */;
 			buildPhases = (
 				427C17E32BD311B400955B98 /* Sources */,
 				427C17E42BD311B400955B98 /* Frameworks */,
@@ -295,7 +295,7 @@
 			);
 			dependencies = (
 			);
-			name = "Leader Key";
+			name = "Keywink";
 			packageProductDependencies = (
 				427C18162BD311ED00955B98 /* KeyboardShortcuts */,
 				427C18192BD3123C00955B98 /* Defaults */,
@@ -309,9 +309,9 @@
 			productReference = 427C17E72BD311B400955B98 /* Keywink.app */;
 			productType = "com.apple.product-type.application";
 		};
-		427C17F72BD311B500955B98 /* Leader KeyTests */ = {
+		427C17F72BD311B500955B98 /* KeywinkTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 427C180F2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Leader KeyTests" */;
+			buildConfigurationList = 427C180F2BD311B500955B98 /* Build configuration list for PBXNativeTarget "KeywinkTests" */;
 			buildPhases = (
 				427C17F42BD311B500955B98 /* Sources */,
 				427C17F52BD311B500955B98 /* Frameworks */,
@@ -322,9 +322,9 @@
 			dependencies = (
 				427C17FA2BD311B500955B98 /* PBXTargetDependency */,
 			);
-			name = "Leader KeyTests";
-			productName = "Leader KeyTests";
-			productReference = 427C17F82BD311B500955B98 /* Leader KeyTests.xctest */;
+			name = "KeywinkTests";
+			productName = "KeywinkTests";
+			productReference = 427C17F82BD311B500955B98 /* KeywinkTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -346,7 +346,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 427C17E22BD311B400955B98 /* Build configuration list for PBXProject "Leader Key" */;
+			buildConfigurationList = 427C17E22BD311B400955B98 /* Build configuration list for PBXProject "Keywink" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -368,8 +368,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				427C17E62BD311B400955B98 /* Leader Key */,
-				427C17F72BD311B500955B98 /* Leader KeyTests */,
+				427C17E62BD311B400955B98 /* Keywink */,
+				427C17F72BD311B500955B98 /* KeywinkTests */,
 			);
 		};
 /* End PBXProject section */
@@ -457,7 +457,7 @@
 /* Begin PBXTargetDependency section */
 		427C17FA2BD311B500955B98 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 427C17E62BD311B400955B98 /* Leader Key */;
+			target = 427C17E62BD311B400955B98 /* Keywink */;
 			targetProxy = 427C17F92BD311B500955B98 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -593,17 +593,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = "Leader Key/Leader_Key.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Keywink/Keywink.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Leader Key/Support/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Keywink/Support/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Leader Key/Support/Info.plist";
+				INFOPLIST_FILE = "Keywink/Support/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Keywink;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -618,7 +618,6 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.niklas-heer.Keywink";
 				PRODUCT_NAME = Keywink;
-				PRODUCT_MODULE_NAME = Leader_Key;
 				KEYWINK_UPDATE_FEED_URL = "";
 				KEYWINK_UPDATE_PUBLIC_KEY = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -632,17 +631,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
-				CODE_SIGN_ENTITLEMENTS = "Leader Key/Leader_Key.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "Keywink/Keywink.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Leader Key/Support/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Keywink/Support/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Leader Key/Support/Info.plist";
+				INFOPLIST_FILE = "Keywink/Support/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Keywink;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
@@ -657,7 +656,6 @@
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "de.niklas-heer.Keywink";
 				PRODUCT_NAME = Keywink;
-				PRODUCT_MODULE_NAME = Leader_Key;
 				KEYWINK_UPDATE_FEED_URL = "";
 				KEYWINK_UPDATE_PUBLIC_KEY = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -704,7 +702,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		427C17E22BD311B400955B98 /* Build configuration list for PBXProject "Leader Key" */ = {
+		427C17E22BD311B400955B98 /* Build configuration list for PBXProject "Keywink" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				427C180A2BD311B500955B98 /* Debug */,
@@ -713,7 +711,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		427C180C2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Leader Key" */ = {
+		427C180C2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Keywink" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				427C180D2BD311B500955B98 /* Debug */,
@@ -722,7 +720,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		427C180F2BD311B500955B98 /* Build configuration list for PBXNativeTarget "Leader KeyTests" */ = {
+		427C180F2BD311B500955B98 /* Build configuration list for PBXNativeTarget "KeywinkTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				427C18102BD311B500955B98 /* Debug */,

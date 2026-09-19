@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-@testable import Leader_Key
+@testable import Keywink
 
 final class UsageStatisticsTests: XCTestCase {
   private var defaults: UserDefaults!

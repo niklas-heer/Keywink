@@ -28,8 +28,8 @@ fi
 mkdir -p "$(dirname "$archive_path")"
 
 xcodebuild archive \
-  -project "Leader Key.xcodeproj" \
-  -scheme "Leader Key" \
+  -project "Keywink.xcodeproj" \
+  -scheme "Keywink" \
   -configuration Release \
   -destination "generic/platform=macOS" \
   -archivePath "$archive_path" \

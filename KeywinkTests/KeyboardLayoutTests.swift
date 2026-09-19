@@ -5,7 +5,7 @@ import Defaults
 import KeyboardShortcuts
 import XCTest
 
-@testable import Leader_Key
+@testable import Keywink
 
 class KeyboardLayoutTests: XCTestCase {
   var controller: Controller!

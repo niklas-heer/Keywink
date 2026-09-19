@@ -2,7 +2,7 @@
 
 Keywink releases are prepared locally and uploaded to this repository's GitHub Releases. The repository does not contain signing credentials, publish artifacts automatically, or reuse the inherited Leader Key S3 bucket and appcast workflow.
 
-The Xcode project and scheme keep the inherited `Leader Key` name for now. The shipped product is `Keywink.app`, with bundle identifier `de.niklas-heer.Keywink`.
+The Xcode project, scheme, and targets are named `Keywink`. The shipped product is `Keywink.app`, with bundle identifier `de.niklas-heer.Keywink`.
 
 ## Prerequisites
 

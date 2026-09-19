@@ -3,7 +3,7 @@ import Defaults
 import KeyboardShortcuts
 import XCTest
 
-@testable import Leader_Key
+@testable import Keywink
 
 final class TopEdgeTests: XCTestCase {
   func testPanelCentersInNotchedDisplayVisibleFrame() {

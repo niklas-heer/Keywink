@@ -8,8 +8,6 @@ Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderK
 
 Keywink has its own application identity and local build/release preparation. There is no published Keywink release yet. Builds use the `Keywink.app` name, `de.niklas-heer.Keywink` bundle identifier, and `keywink://` URL scheme. Leader Key can remain installed alongside it.
 
-The Xcode project, target, scheme, and Swift module retain their inherited names to keep this migration small. These internal names do not determine the installed app's identity.
-
 ## Development
 
 Install Xcode with the macOS SDK, complete its first-launch setup, and install [mise](https://mise.jdx.dev/). Xcode provides Swift and the formatter; Swift Package Manager dependencies are locked in the project. No Homebrew packages are required to build.

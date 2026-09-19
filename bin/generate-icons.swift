@@ -10,7 +10,7 @@ private let repositoryRoot = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()
     .deletingLastPathComponent()
 private let assetRoot = repositoryRoot
-    .appendingPathComponent("Leader Key/Assets.xcassets")
+    .appendingPathComponent("Keywink/Assets.xcassets")
 
 private let iconFiles: [(name: String, pixels: Int)] = [
     ("icon_16px-16pt@1x.png", 16),

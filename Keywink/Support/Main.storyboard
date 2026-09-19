@@ -385,7 +385,7 @@
                     </connections>
                 </application>
                 <customObject id="elY-qP-5N9" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <customObject id="7H0-Ae-Klq" customClass="AppDelegate" customModule="Leader_Key" customModuleProvider="target"/>
+                <customObject id="7H0-Ae-Klq" customClass="AppDelegate" customModule="Keywink" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="75" y="0.0"/>
         </scene>

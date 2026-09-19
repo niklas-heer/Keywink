@@ -23,7 +23,7 @@ if [[ ! $build_number =~ ^[1-9][0-9]*$ ]]; then
   exit 64
 fi
 
-project_file="Leader Key.xcodeproj/project.pbxproj"
+project_file="Keywink.xcodeproj/project.pbxproj"
 marketing_version_count=$(/usr/bin/grep -Ec 'MARKETING_VERSION = [0-9]+\.[0-9]+\.[0-9]+;' "$project_file" || true)
 build_number_count=$(/usr/bin/grep -Ec 'CURRENT_PROJECT_VERSION = [0-9]+;' "$project_file" || true)
 

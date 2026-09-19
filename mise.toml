@@ -2,8 +2,8 @@
 description = "Build the Keywink app without code signing"
 run = '''
 xcodebuild build \
-  -project "Leader Key.xcodeproj" \
-  -scheme "Leader Key" \
+  -project "Keywink.xcodeproj" \
+  -scheme "Keywink" \
   -configuration Debug \
   -destination "platform=macOS" \
   -derivedDataPath build \
@@ -14,8 +14,8 @@ xcodebuild build \
 description = "Run the isolated Keywink test suite"
 run = '''
 xcodebuild test \
-  -project "Leader Key.xcodeproj" \
-  -scheme "Leader Key" \
+  -project "Keywink.xcodeproj" \
+  -scheme "Keywink" \
   -destination "platform=macOS" \
   -testPlan "TestPlan" \
   -derivedDataPath build \
@@ -26,16 +26,16 @@ xcodebuild test \
 description = "Format Swift sources in place"
 run = '''
 xcrun swift-format format --in-place --recursive \
-  "Leader Key" \
-  "Leader KeyTests"
+  "Keywink" \
+  "KeywinkTests"
 '''
 
 [tasks.lint]
 description = "Check Swift formatting"
 run = '''
 xcrun swift-format lint --strict --recursive \
-  "Leader Key" \
-  "Leader KeyTests"
+  "Keywink" \
+  "KeywinkTests"
 '''
 
 [tasks.scripts]

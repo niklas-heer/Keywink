@@ -1,6 +1,6 @@
 import XCTest
 
-@testable import Leader_Key
+@testable import Keywink
 
 final class ConfigValidatorTests: XCTestCase {
 

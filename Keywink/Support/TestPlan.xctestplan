@@ -14,9 +14,9 @@
   "testTargets" : [
     {
       "target" : {
-        "containerPath" : "container:Leader Key.xcodeproj",
+        "containerPath" : "container:Keywink.xcodeproj",
         "identifier" : "427C17F72BD311B500955B98",
-        "name" : "Leader KeyTests"
+        "name" : "KeywinkTests"
       }
     }
   ],
