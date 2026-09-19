@@ -262,6 +262,12 @@ enum TopEdge {
       .font(.system(size: 11, weight: .medium, design: .monospaced))
       .padding(.horizontal, 7)
       .frame(height: 24)
+      .overlay(alignment: .bottom) {
+        Rectangle()
+          .fill(.primary.opacity(0.08))
+          .frame(height: 1)
+          .offset(y: 2)
+      }
     }
   }
 
@@ -294,10 +300,10 @@ enum TopEdge {
       Button(action: choose) {
         HStack(spacing: 9) {
           Text(KeyMaps.glyph(for: item.item.key ?? "") ?? item.item.key ?? "—")
-            .font(.system(size: 11, weight: .medium, design: .monospaced))
-            .foregroundStyle(.secondary)
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .foregroundStyle(.primary)
             .frame(minWidth: 22, minHeight: 20)
-            .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
+            .background(.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 4))
           if !labelStartsWithEmoji {
             actionIcon(item: item, iconSize: NSSize(width: 17, height: 17), loadFavicons: false)
               .accessibilityHidden(true)
