@@ -35,6 +35,11 @@ class AppDelegate: NSObject, NSApplicationDelegate,
         contentView: {
           AdvancedPane().environmentObject(self.config)
         }),
+      Settings.Pane(
+        identifier: .statistics, title: "Statistics",
+        toolbarIcon: NSImage(
+          systemSymbolName: "chart.bar", accessibilityDescription: "Statistics")!,
+        contentView: { StatisticsPane() }),
     ],
     style: .segmentedControl,
   )
@@ -132,8 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     for groupKey in Defaults[.groupShortcuts] {
       print("Registering shortcut for \(groupKey)")
       KeyboardShortcuts.onKeyDown(for: KeyboardShortcuts.Name("group-\(groupKey)")) {
-        guard self.controller.userState.openRootGroup(for: groupKey) else { return }
-        self.show()
+        self.controller.openRootGroup(for: groupKey)
       }
     }
     if Defaults[.groupShortcuts].isEmpty && !KeyboardShortcuts.isEnabled(for: .activate) {

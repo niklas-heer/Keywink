@@ -18,6 +18,8 @@ enum KeyHelpers: UInt16 {
 class Controller {
   var userState: UserState
   var userConfig: UserConfig
+  let usage: UsageStatistics
+  private let sourceApplication: () -> (id: String, name: String)
 
   var window: MainWindow!
   var cheatsheetWindow: NSWindow!
@@ -25,9 +27,18 @@ class Controller {
 
   private var cancellables = Set<AnyCancellable>()
 
-  init(userState: UserState, userConfig: UserConfig) {
+  init(
+    userState: UserState, userConfig: UserConfig,
+    usage: UsageStatistics = .shared,
+    sourceApplication: @escaping () -> (id: String, name: String) = {
+      let app = NSWorkspace.shared.frontmostApplication
+      return (app?.bundleIdentifier ?? "unknown", app?.localizedName ?? "Unknown application")
+    }
+  ) {
     self.userState = userState
     self.userConfig = userConfig
+    self.usage = usage
+    self.sourceApplication = sourceApplication
 
     Task {
       for await value in Defaults.updates(.theme) {
@@ -55,6 +66,13 @@ class Controller {
   }
 
   func show() {
+    if !window.isVisible && !userState.isShowingRefreshState {
+      let source = sourceApplication()
+      userState.sourceAppID = source.id
+      if Defaults[.trackUsage] {
+        usage.recordOpening(appID: source.id, appName: source.name)
+      }
+    }
     Events.send(.willActivate)
 
     let screen = Defaults[.screen].getNSScreen() ?? NSScreen()
@@ -73,6 +91,26 @@ class Controller {
       scheduleCheatsheet()
     default: break
     }
+  }
+
+  func openRootGroup(for key: String) {
+    guard userState.openRootGroup(for: key) else { return }
+    show()
+    recordCurrentGroupView()
+  }
+
+  func goBack() {
+    guard !userState.navigationPath.isEmpty else { return }
+    userState.goBack()
+    recordCurrentGroupView()
+    positionCheatsheetWindow()
+  }
+
+  private func recordCurrentGroupView() {
+    guard Defaults[.trackUsage], !userState.keyPath.isEmpty,
+      let appID = userState.sourceAppID
+    else { return }
+    usage.recordGroup(path: userState.keyPath, appID: appID)
   }
 
   func hide(afterClose: (() -> Void)? = nil) {
@@ -115,7 +153,7 @@ class Controller {
 
     switch event.keyCode {
     case KeyHelpers.backspace.rawValue:
-      clear()
+      goBack()
       delay(1) {
         self.positionCheatsheetWindow()
       }
@@ -162,6 +200,7 @@ class Controller {
     switch hit {
     case .action(let action):
       if execute {
+        recordActionUse(action, parentPath: userState.keyPath)
         if let mods = modifiers, isInStickyMode(mods) {
           runAction(action)
         } else {
@@ -173,12 +212,14 @@ class Controller {
     // If execute is false, just stay visible showing the matched action
     case .group(let group):
       if execute, let mods = modifiers, shouldRunGroupSequenceWithModifiers(mods) {
+        let path = userState.keyPath + [group.key ?? ""]
         hide {
-          self.runGroup(group)
+          self.runGroup(group, path: path)
         }
       } else {
         userState.display = group.key
         userState.navigateToGroup(group)
+        recordCurrentGroupView()
       }
     case .none:
       window.notFound()
@@ -290,15 +331,23 @@ class Controller {
     }
   }
 
-  private func runGroup(_ group: Group) {
+  private func runGroup(_ group: Group, path: [String]) {
     for groupOrAction in group.actions {
       switch groupOrAction {
       case .group(let group):
-        runGroup(group)
+        runGroup(group, path: path + [group.key ?? ""])
       case .action(let action):
+        recordActionUse(action, parentPath: path)
         runAction(action)
       }
     }
+  }
+
+  private func recordActionUse(_ action: Action, parentPath: [String]) {
+    guard Defaults[.trackUsage], let appID = userState.sourceAppID,
+      let key = action.key
+    else { return }
+    usage.recordAction(path: parentPath + [key], appID: appID)
   }
 
   private func runAction(_ action: Action) {

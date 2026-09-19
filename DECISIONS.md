@@ -88,7 +88,7 @@ Verification: Debug and unsigned universal Release builds pass, as do all 52 tes
 
 ## 9. Center the guide and use editor-style visual hints
 
-Date: 2026-09-19. Status: accepted direction; implemented as Key Guide.
+Date: 2026-09-19. Status: accepted direction; implemented as Key Guide. List layout and navigation refined by Decision 10.
 
 Niklas reconsidered the top position in favor of the screen center, where attention already sits, and requested a developer aesthetic inspired by IDE completion lists and Helix. Keep the compact keyboard-guide interaction from Decision 7, but center it in the selected display's usable frame. Use a wide, restrained shape with monospace keys and group context, native material, app icons, SF Symbols, and emoji labels. The visible theme name becomes **Key Guide**; preserve the `topEdge` preference value so existing selections receive the revision.
 
@@ -99,3 +99,15 @@ Global group shortcuts resolve from the root even when another group is open. Th
 Run shell commands on a serial background queue so long-running actions such as selected-text speech leave the launcher responsive while preserving command order. Capture output in private temporary files to avoid pipe-buffer deadlocks, and present failures on the main thread.
 
 Verification: all 55 tests and required mise checks pass. Native root/group renders were inspected in light and dark appearances, and the running app loaded the migrated five groups and displayed the application group. Geometry coverage checks centered placement on ordinary, narrow, and offset displays; command coverage checks responsiveness, large output, and nonzero exit reporting. The final command-queue refinement also passes its focused regression. Physical use of the migrated shortcuts and custom automation remains a user trial.
+
+## 10. Use a single-column guide with parent navigation and local usage ranking
+
+Date: 2026-09-19. Status: implemented under the requested guide refinement.
+
+Niklas requested a tighter developer-style list, shortcut combinations on the right, a Hyper symbol, subtle animation, and Backspace moving up one hierarchy level through arbitrarily nested groups. Use one column with compact rows, native icons/emoji, right-aligned key hints, and **✦** for the four Hyper modifiers. The header shows the shortcut sequence to its group; direct root-group shortcuts appear beside their rows. Backspace and the back button pop one group, with no effect at the root. Preserve the centered position, native appearance, and reduced-motion/transparency behavior from Decision 9.
+
+Niklas also requested statistics on openings in different applications and optional frequency ranking. Store aggregate launcher openings, group views, and action selections locally in Keywink preferences, attributed to the application active at invocation. Do not store window titles, document content, commands, URLs, or a timestamped activity log. Provide tracking and ranking toggles and a reset control in Statistics settings. Tracking starts enabled; ranking starts disabled. These defaults, the Hyper glyph, and ranking details are implementation choices within the requested feature, not separately established personal preferences.
+
+Ranking is per sibling list using source-app counts, with overall counts as a fallback when that app has no history for the list. Preserve configuration order for ties and never reorder the JSON or change assigned keys. Statistics identify items by normalized key paths, so nested keys do not collide and config reloads preserve history. Reassigning an existing path inherits its counts; reset clears that history. A group view means entering or returning to that group; an action selection does not claim the external action succeeded. Automatic config-reload presentations and invalid keys do not count as launcher openings or action selections.
+
+Verification: Debug build and all required mise checks pass (62 native tests, strict formatting, release-script syntax). Tests exercise three nested levels through actual Backspace events, direct root-group switching, isolated statistics persistence/reset, stable app-specific ranking, tracking disabled, source-app context across sessions, and config-refresh exclusion. Native guide renders were inspected in light/dark appearance; the running personal setup showed its Hyper hints, parent navigation, and populated Statistics pane.

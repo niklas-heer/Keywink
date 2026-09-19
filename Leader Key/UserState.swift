@@ -9,6 +9,9 @@ final class UserState: ObservableObject {
   @Published var display: String?
   @Published var isShowingRefreshState: Bool
   @Published var navigationPath: [Group] = []
+  @Published var sourceAppID: String?
+
+  var keyPath: [String] { navigationPath.compactMap(\.key) }
 
   var currentGroup: Group? {
     return navigationPath.last
@@ -37,6 +40,13 @@ final class UserState: ObservableObject {
 
   func navigateToGroup(_ group: Group) {
     navigationPath.append(group)
+  }
+
+  func goBack() {
+    guard !navigationPath.isEmpty else { return }
+    navigationPath.removeLast()
+    display = currentGroup?.key
+    isShowingRefreshState = false
   }
 
   /// Global group shortcuts always resolve from the root, even inside another group.

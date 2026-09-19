@@ -48,6 +48,8 @@ extension Defaults.Keys {
     "modifierKeyConfiguration", default: .controlGroupOptionSticky, suite: defaultsSuite)
   static let theme = Key<Theme>(
     "theme", default: .topEdge, suite: defaultsSuite)
+  static let trackUsage = Key<Bool>("trackUsage", default: true, suite: defaultsSuite)
+  static let rankByFrequency = Key<Bool>("rankByFrequency", default: false, suite: defaultsSuite)
 
   static let autoOpenCheatsheet = Key<AutoOpenCheatsheetSetting>(
     "autoOpenCheatsheet",

@@ -1,31 +1,29 @@
 import Cocoa
 import Combine
+import Defaults
+import KeyboardShortcuts
 import SwiftUI
 
 /// A centered keyboard guide that presents shortcuts like editor completions.
 enum TopEdge {
   struct Layout {
     let frame: NSRect
-    let columns: Int
 
     static func make(
-      screenFrame: NSRect, visibleFrame: NSRect, itemCount: Int,
-      hasBreadcrumb: Bool = false
+      screenFrame: NSRect, visibleFrame: NSRect, itemCount: Int
     ) -> Layout {
       let available = visibleFrame.intersection(screenFrame)
-      let width = min(560, max(0, available.width - 40))
-      let columns = width >= 440 ? 2 : 1
-      let rows = max(1, min(6, Int(ceil(Double(itemCount) / Double(columns)))))
+      let width = min(520, max(0, available.width - 40))
+      let rows = max(1, min(10, itemCount))
       let height = min(
         max(0, available.height - 40),
-        24 + CGFloat(rows) * 40 + CGFloat(rows - 1) * 4 + (hasBreadcrumb ? 32 : 0))
+        52 + CGFloat(rows) * 32 + CGFloat(rows - 1) * 2)
       return Layout(
         frame: NSRect(
           x: available.midX - width / 2,
           y: available.midY - height / 2,
           width: width,
-          height: height),
-        columns: columns)
+          height: height))
     }
   }
 
@@ -36,7 +34,6 @@ enum TopEdge {
     private var screenObservation: AnyCancellable?
     private var presentation: UInt = 0
     private var dismissing = false
-    private let model = Presentation()
 
     required init(controller: Controller) {
       super.init(controller: controller, contentRect: .zero)
@@ -45,10 +42,10 @@ enum TopEdge {
       collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
       contentView = NSHostingView(
         rootView: MainView(
-          presentation: model,
           choose: { [weak controller] key in controller?.handleKey(key) },
-          reset: { [weak controller] in controller?.userState.clear() }
+          goBack: { [weak controller] in controller?.goBack() }
         )
+        .environmentObject(controller.usage)
         .environmentObject(controller.userState)
         .environmentObject(controller.userConfig))
 
@@ -80,6 +77,12 @@ enum TopEdge {
     }
 
     override func show(on screen: NSScreen, after: (() -> Void)? = nil) {
+      if isVisible && !dismissing {
+        selectedScreen = screen
+        position(animated: true)
+        after?()
+        return
+      }
       presentation &+= 1
       dismissing = false
       let current = presentation
@@ -130,10 +133,7 @@ enum TopEdge {
       let items = controller.userState.currentGroup?.actions ?? controller.userConfig.root.actions
       let layout = Layout.make(
         screenFrame: screen.frame, visibleFrame: screen.visibleFrame,
-        itemCount: controller.userState.isShowingRefreshState ? 0 : items.count,
-        hasBreadcrumb: !controller.userState.navigationPath.isEmpty
-          && !controller.userState.isShowingRefreshState)
-      model.columns = layout.columns
+        itemCount: controller.userState.isShowingRefreshState ? 0 : items.count)
       if animated && !reducedMotion {
         NSAnimationContext.runAnimationGroup { context in
           context.duration = 0.18
@@ -146,48 +146,42 @@ enum TopEdge {
     }
   }
 
-  final class Presentation: ObservableObject {
-    @Published var columns = 2
-  }
-
   struct MainView: View {
-    @ObservedObject var presentation: Presentation
+    @EnvironmentObject private var usage: UsageStatistics
+    @Default(.rankByFrequency) private var rankByFrequency
     @EnvironmentObject var userState: UserState
     @EnvironmentObject var userConfig: UserConfig
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     let choose: (String) -> Void
-    let reset: () -> Void
+    let goBack: () -> Void
 
     private var items: [ActionOrGroup] {
-      userState.currentGroup?.actions ?? userConfig.root.actions
+      let configured = userState.currentGroup?.actions ?? userConfig.root.actions
+      return rankByFrequency
+        ? usage.ranked(configured, parentPath: userState.keyPath, appID: userState.sourceAppID)
+        : configured
     }
 
     var body: some View {
-      VStack(spacing: 8) {
-        if !userState.navigationPath.isEmpty && !userState.isShowingRefreshState {
-          contextPath
-        }
+      VStack(spacing: 4) {
+        contextPath
 
         ScrollView {
           if userState.isShowingRefreshState {
             Label("Configuration reloaded", systemImage: "checkmark")
               .font(.system(size: 13))
               .foregroundStyle(.secondary)
-              .frame(maxWidth: .infinity, minHeight: 37)
+              .frame(maxWidth: .infinity, minHeight: 32)
           } else if items.isEmpty {
             Text("Add shortcuts in Settings to get started.")
               .font(.system(size: 13))
               .foregroundStyle(.secondary)
-              .frame(maxWidth: .infinity, minHeight: 37)
+              .frame(maxWidth: .infinity, minHeight: 32)
           } else {
-            LazyVGrid(
-              columns: Array(
-                repeating: GridItem(.flexible(), spacing: 22), count: presentation.columns),
-              spacing: 4
-            ) {
+            LazyVStack(spacing: 2) {
               ForEach(items, id: \.uiid) { item in
-                Shortcut(item: item) {
+                Shortcut(item: item, globalShortcut: globalShortcut(for: item)) {
                   if let key = item.item.key { choose(key) }
                 }
               }
@@ -195,6 +189,7 @@ enum TopEdge {
           }
         }
         .id(userState.navigationPath.map(\.uiid))
+        .transition(reduceMotion ? .identity : .opacity.combined(with: .offset(x: 8)))
       }
       .padding(.horizontal, 14)
       .padding(.vertical, 12)
@@ -208,41 +203,81 @@ enum TopEdge {
       }
       .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
       .animation(
-        reduceMotion ? nil : .easeInOut(duration: 0.18), value: userState.navigationPath.count)
+        reduceMotion ? nil : .easeOut(duration: 0.16), value: userState.navigationPath.map(\.uiid))
+    }
+
+    private func globalShortcut(for item: ActionOrGroup) -> KeyboardShortcuts.Shortcut? {
+      guard userState.navigationPath.isEmpty, case .group(let group) = item,
+        let key = group.key, Defaults[.groupShortcuts].contains(key)
+      else { return nil }
+      return KeyboardShortcuts.getShortcut(for: .init("group-\(key)"))
+    }
+
+    private var sequenceHint: String {
+      let path = userState.keyPath
+      if let first = path.first, Defaults[.groupShortcuts].contains(first),
+        let shortcut = KeyboardShortcuts.getShortcut(for: .init("group-\(first)"))
+      {
+        return
+          ([TopEdge.shortcutLabel(shortcut)] + path.dropFirst().map { KeyMaps.glyph(for: $0) ?? $0 })
+          .joined(separator: " › ")
+      }
+      let root = KeyboardShortcuts.getShortcut(for: .activate).map(TopEdge.shortcutLabel)
+      return ([root].compactMap { $0 } + path.map { KeyMaps.glyph(for: $0) ?? $0 })
+        .joined(separator: " › ")
     }
 
     private var contextPath: some View {
-      Button(action: reset) {
-        HStack(spacing: 7) {
-          Image(systemName: "chevron.backward")
-            .font(.system(size: 9, weight: .semibold))
-          Text("$ keywink")
-            .foregroundStyle(.tertiary)
-          Text("/")
-            .foregroundStyle(.tertiary)
+      HStack(spacing: 8) {
+        if !userState.navigationPath.isEmpty {
+          Button(action: goBack) {
+            Image(systemName: "chevron.backward")
+              .font(.system(size: 10, weight: .semibold))
+              .frame(width: 20, height: 24)
+              .contentShape(Rectangle())
+          }
+          .buttonStyle(.plain)
+          .accessibilityLabel("Go up one level")
+          .help("Go up one level (Backspace)")
+        }
+        Text("$ keywink")
+          .foregroundStyle(.secondary)
+        if !userState.navigationPath.isEmpty {
+          Text("/").foregroundStyle(.tertiary)
           Text(userState.navigationPath.map(\.displayName).joined(separator: " / "))
             .lineLimit(1)
             .truncationMode(.head)
-          Spacer(minLength: 0)
         }
-        .contentShape(Rectangle())
+        Spacer(minLength: 8)
+        if !sequenceHint.isEmpty {
+          Text(sequenceHint)
+            .lineLimit(1)
+            .truncationMode(.head)
+            .layoutPriority(1)
+            .foregroundStyle(.secondary)
+            .help("Shortcut to this group. ✦ = Hyper (Control–Option–Shift–Command). › means then.")
+            .accessibilityLabel(sequenceHint.replacingOccurrences(of: "✦", with: "Hyper "))
+        }
       }
-      .buttonStyle(.plain)
       .font(.system(size: 11, weight: .medium, design: .monospaced))
-      .foregroundStyle(.secondary)
       .padding(.horizontal, 7)
       .frame(height: 24)
-      .accessibilityLabel(
-        "All shortcuts, \(userState.navigationPath.map(\.displayName).joined(separator: ", "))"
-      )
-      .accessibilityHint("Return to the root shortcuts. You can also press Backspace.")
     }
+  }
+
+  @MainActor
+  static func shortcutLabel(_ shortcut: KeyboardShortcuts.Shortcut) -> String {
+    let hyper: NSEvent.ModifierFlags = [.control, .option, .shift, .command]
+    guard shortcut.modifiers.intersection(hyper) == hyper else { return shortcut.description }
+    return "✦ " + shortcut.description.filter { !"⌃⌥⇧⌘".contains($0) }
   }
 
   private struct Shortcut: View {
     let item: ActionOrGroup
+    let globalShortcut: KeyboardShortcuts.Shortcut?
     let choose: () -> Void
     @State private var hovered = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var labelStartsWithEmoji: Bool {
       guard
@@ -258,11 +293,6 @@ enum TopEdge {
     var body: some View {
       Button(action: choose) {
         HStack(spacing: 9) {
-          Text(KeyMaps.glyph(for: item.item.key ?? "") ?? item.item.key ?? "—")
-            .font(.system(size: 11, weight: .semibold, design: .monospaced))
-            .foregroundStyle(.secondary)
-            .frame(width: 25, height: 24)
-            .background(.primary.opacity(0.075), in: RoundedRectangle(cornerRadius: 6))
           if !labelStartsWithEmoji {
             actionIcon(item: item, iconSize: NSSize(width: 17, height: 17), loadFavicons: false)
               .accessibilityHidden(true)
@@ -271,7 +301,18 @@ enum TopEdge {
             .font(.system(size: 13))
             .lineLimit(1)
             .truncationMode(.middle)
-          Spacer(minLength: 0)
+          Spacer(minLength: 8)
+          if let globalShortcut {
+            Text(TopEdge.shortcutLabel(globalShortcut))
+              .font(.system(size: 10, design: .monospaced))
+              .foregroundStyle(.secondary)
+              .help("Global shortcut. ✦ = Hyper (Control–Option–Shift–Command).")
+          }
+          Text(KeyMaps.glyph(for: item.item.key ?? "") ?? item.item.key ?? "—")
+            .font(.system(size: 11, weight: .medium, design: .monospaced))
+            .foregroundStyle(.secondary)
+            .frame(minWidth: 22, minHeight: 20)
+            .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
           if case .group = item {
             Image(systemName: "chevron.forward")
               .font(.system(size: 9, weight: .semibold))
@@ -279,14 +320,15 @@ enum TopEdge {
           }
         }
         .padding(.horizontal, 7)
-        .frame(height: 40)
+        .frame(height: 32)
         .background(
-          .primary.opacity(hovered ? 0.065 : 0), in: RoundedRectangle(cornerRadius: 8)
+          .primary.opacity(hovered ? 0.065 : 0), in: RoundedRectangle(cornerRadius: 5)
         )
-        .contentShape(RoundedRectangle(cornerRadius: 8))
+        .contentShape(RoundedRectangle(cornerRadius: 5))
       }
       .buttonStyle(.plain)
       .onHover { hovered = $0 }
+      .animation(reduceMotion ? nil : .easeOut(duration: 0.1), value: hovered)
       .accessibilityLabel("\(item.item.key ?? ""): \(item.item.displayName)")
       .accessibilityHint(item.item.type == .group ? "Open shortcut group" : "Run shortcut")
     }
