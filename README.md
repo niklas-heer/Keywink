@@ -26,7 +26,7 @@ Tests use temporary configuration directories and an isolated preferences domain
 
 Open Keywink's menu bar item, choose **Settings…**, and record the shortcut that opens the launcher. Add actions or groups in the configuration editor. Then press your shortcut followed by the keys in a sequence: for example, `o`, then `m` to open Messages.
 
-**Key Guide** is the default launcher theme: a compact, centered list inspired by editor completions and modal key hints. Icons and emoji labels sit on the left; key hints sit on the right. **✦** means Hyper (Control–Option–Shift–Command), and **›** separates successive keys. The header shows a shortcut sequence to the current group. Top-level groups also show their direct global shortcut when one is assigned.
+**Key Guide** is the default launcher theme: a compact, centered list inspired by editor completions and modal key hints. Each row starts with its key badge, followed by the icon and name. Direct Hyper shortcut hints stay on the right, within a narrower 440-point guide. **✦** means Hyper (Control–Option–Shift–Command), and **›** separates successive keys. The header shows a shortcut sequence to the current group. Top-level groups also show their direct global shortcut when one is assigned.
 
 Groups can nest to any depth. **Backspace** or the back arrow moves up one level; **Escape** dismisses. Width and center stay steady while the height follows the group, up to ten visible rows before scrolling. Brief fade and slide transitions follow the system's reduced-motion setting, and native material follows light/dark appearance and reduced transparency. Choose **Settings → General → Theme → Key Guide** to switch themes; existing Top Edge selections use Key Guide.
 

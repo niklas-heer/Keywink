@@ -13,7 +13,7 @@ enum TopEdge {
       screenFrame: NSRect, visibleFrame: NSRect, itemCount: Int
     ) -> Layout {
       let available = visibleFrame.intersection(screenFrame)
-      let width = min(520, max(0, available.width - 40))
+      let width = min(440, max(0, available.width - 40))
       let rows = max(1, min(10, itemCount))
       let height = min(
         max(0, available.height - 40),
@@ -293,6 +293,11 @@ enum TopEdge {
     var body: some View {
       Button(action: choose) {
         HStack(spacing: 9) {
+          Text(KeyMaps.glyph(for: item.item.key ?? "") ?? item.item.key ?? "—")
+            .font(.system(size: 11, weight: .medium, design: .monospaced))
+            .foregroundStyle(.secondary)
+            .frame(minWidth: 22, minHeight: 20)
+            .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
           if !labelStartsWithEmoji {
             actionIcon(item: item, iconSize: NSSize(width: 17, height: 17), loadFavicons: false)
               .accessibilityHidden(true)
@@ -308,11 +313,6 @@ enum TopEdge {
               .foregroundStyle(.secondary)
               .help("Global shortcut. ✦ = Hyper (Control–Option–Shift–Command).")
           }
-          Text(KeyMaps.glyph(for: item.item.key ?? "") ?? item.item.key ?? "—")
-            .font(.system(size: 11, weight: .medium, design: .monospaced))
-            .foregroundStyle(.secondary)
-            .frame(minWidth: 22, minHeight: 20)
-            .background(.primary.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
           if case .group = item {
             Image(systemName: "chevron.forward")
               .font(.system(size: 9, weight: .semibold))

@@ -13,7 +13,7 @@ final class TopEdgeTests: XCTestCase {
       itemCount: 7)
     XCTAssertEqual(layout.frame.midX, 756)
     XCTAssertEqual(layout.frame.midY, 507)
-    XCTAssertEqual(layout.frame.width, 520)
+    XCTAssertEqual(layout.frame.width, 440)
     XCTAssertEqual(layout.frame.height, 288)
   }
 
@@ -29,14 +29,14 @@ final class TopEdgeTests: XCTestCase {
   }
 
   func testLongGroupsStayBoundedOnNarrowDisplays() {
-    let screen = NSRect(x: 100, y: 100, width: 500, height: 700)
-    let visible = NSRect(x: 100, y: 150, width: 500, height: 625)
+    let screen = NSRect(x: 100, y: 100, width: 380, height: 700)
+    let visible = NSRect(x: 100, y: 150, width: 380, height: 625)
     let small = TopEdge.Layout.make(
       screenFrame: screen, visibleFrame: visible, itemCount: 0)
     let large = TopEdge.Layout.make(
       screenFrame: screen, visibleFrame: visible, itemCount: 300)
     XCTAssertTrue(visible.contains(large.frame))
-    XCTAssertEqual(large.frame.width, 460)
+    XCTAssertEqual(large.frame.width, 340)
     XCTAssertGreaterThan(large.frame.height, small.frame.height)
     XCTAssertEqual(large.frame.height, 390)
     XCTAssertEqual(large.frame.midY, small.frame.midY)
@@ -101,7 +101,7 @@ final class TopEdgeTests: XCTestCase {
     XCTAssertTrue(window.isVisible)
     XCTAssertEqual(window.frame.midX, screen.visibleFrame.midX, accuracy: 0.5)
     XCTAssertEqual(window.frame.midY, screen.visibleFrame.midY, accuracy: 0.5)
-    XCTAssertEqual(window.frame.width, 520)
+    XCTAssertEqual(window.frame.width, 440)
     let rootWidth = window.frame.width
     let rootCenter = NSPoint(x: window.frame.midX, y: window.frame.midY)
     let rootHeight = window.frame.height
