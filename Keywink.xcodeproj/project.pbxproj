@@ -13,6 +13,7 @@
 		A01A01A01A01A01A01A01001 /* TopEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01A01A01A01A01A01A01002 /* TopEdge.swift */; };
 		A01A01A01A01A01A01A01003 /* TopEdgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01A01A01A01A01A01A01004 /* TopEdgeTests.swift */; };
 		115AA5BF2DA521C600C17E18 /* ActionIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 115AA5BE2DA521C200C17E18 /* ActionIcon.swift */; };
+		A0B1C2D3E4F5061728394A09 /* CustomIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A0A /* CustomIcon.swift */; };
 		115AA5C22DA546D500C17E18 /* SymbolPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 115AA5C12DA546D500C17E18 /* SymbolPicker */; };
 		130196C62D73B3DE0093148B /* Breadcrumbs.swift in Sources */ = {isa = PBXBuildFile; fileRef = 130196C52D73B3DC0093148B /* Breadcrumbs.swift */; };
 		423632222D68CA6500878D92 /* MysteryBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 423632212D68CA6500878D92 /* MysteryBox.swift */; };
@@ -21,6 +22,7 @@
 		42454DDB2D71CB39004E1374 /* ConfigValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42454DDA2D71CB39004E1374 /* ConfigValidator.swift */; };
 		42454DDD2D71CBAB004E1374 /* ConfigValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */; };
 		EC5CEBC4C47B4C5DB2258813 /* URLSchemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */; };
+		A0B1C2D3E4F5061728394A0B /* CustomIconTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A0C /* CustomIconTests.swift */; };
 		A0B1C2D3E4F5061728394A07 /* ControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A08 /* ControllerTests.swift */; };
 		A0B1C2D3E4F5061728394A05 /* SettingsPaneSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A06 /* SettingsPaneSnapshotTests.swift */; };
 		A0B1C2D3E4F5061728394A03 /* GlobalShortcutsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A04 /* GlobalShortcutsTests.swift */; };
@@ -83,6 +85,7 @@
 		A01A01A01A01A01A01A01002 /* TopEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopEdge.swift; sourceTree = "<group>"; };
 		A01A01A01A01A01A01A01004 /* TopEdgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopEdgeTests.swift; sourceTree = "<group>"; };
 		115AA5BE2DA521C200C17E18 /* ActionIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionIcon.swift; sourceTree = "<group>"; };
+		A0B1C2D3E4F5061728394A0A /* CustomIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomIcon.swift; sourceTree = "<group>"; };
 		130196C52D73B3DC0093148B /* Breadcrumbs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Breadcrumbs.swift; sourceTree = "<group>"; };
 		423632142D678F4400878D92 /* TestPlan.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = TestPlan.xctestplan; sourceTree = "<group>"; };
 		423632212D68CA6500878D92 /* MysteryBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MysteryBox.swift; sourceTree = "<group>"; };
@@ -91,6 +94,7 @@
 		42454DDA2D71CB39004E1374 /* ConfigValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigValidator.swift; sourceTree = "<group>"; };
 		42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigValidatorTests.swift; sourceTree = "<group>"; };
 		EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeTests.swift; sourceTree = "<group>"; };
+		A0B1C2D3E4F5061728394A0C /* CustomIconTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomIconTests.swift; sourceTree = "<group>"; };
 		A0B1C2D3E4F5061728394A08 /* ControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerTests.swift; sourceTree = "<group>"; };
 		A0B1C2D3E4F5061728394A06 /* SettingsPaneSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPaneSnapshotTests.swift; sourceTree = "<group>"; };
 		A0B1C2D3E4F5061728394A04 /* GlobalShortcutsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcutsTests.swift; sourceTree = "<group>"; };
@@ -250,6 +254,7 @@
 				4284834B2E813212009D7EEF /* KeyboardLayoutTests.swift */,
 				42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */,
 				EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */,
+				A0B1C2D3E4F5061728394A0C /* CustomIconTests.swift */,
 				A0B1C2D3E4F5061728394A08 /* ControllerTests.swift */,
 				A0B1C2D3E4F5061728394A06 /* SettingsPaneSnapshotTests.swift */,
 				A0B1C2D3E4F5061728394A04 /* GlobalShortcutsTests.swift */,
@@ -281,6 +286,7 @@
 				6D9B9C032DBA000000000002 /* KeyCapture.swift */,
 				6D9B9C052DBA000000000003 /* ConfigEditorShared.swift */,
 				115AA5BE2DA521C200C17E18 /* ActionIcon.swift */,
+				A0B1C2D3E4F5061728394A0A /* CustomIcon.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -422,6 +428,7 @@
 				42FDC31A2D51687B004F5C5C /* AdvancedPane.swift in Sources */,
 				A01A01A01A01A01A01A02005 /* StatisticsPane.swift in Sources */,
 				115AA5BF2DA521C600C17E18 /* ActionIcon.swift in Sources */,
+				A0B1C2D3E4F5061728394A09 /* CustomIcon.swift in Sources */,
 				425495402D75EFAD0020300E /* ForTheHorde.swift in Sources */,
 				42F4CDCF2D46E2B300D0DD76 /* Cheatsheet.swift in Sources */,
 				42DFCD722D5B7D48002EA111 /* Events.swift in Sources */,
@@ -459,6 +466,7 @@
 				A01A01A01A01A01A01A01003 /* TopEdgeTests.swift in Sources */,
 				42454DDD2D71CBAB004E1374 /* ConfigValidatorTests.swift in Sources */,
 				EC5CEBC4C47B4C5DB2258813 /* URLSchemeTests.swift in Sources */,
+				A0B1C2D3E4F5061728394A0B /* CustomIconTests.swift in Sources */,
 				A0B1C2D3E4F5061728394A07 /* ControllerTests.swift in Sources */,
 				A0B1C2D3E4F5061728394A05 /* SettingsPaneSnapshotTests.swift in Sources */,
 				A0B1C2D3E4F5061728394A03 /* GlobalShortcutsTests.swift in Sources */,

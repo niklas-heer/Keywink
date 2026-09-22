@@ -899,8 +899,25 @@ private class ActionCellView: NSTableCellView, NSWindowDelegate {
       anchor: anchor,
       onPickAppIcon: { self.handlePickAppIcon() },
       onPickSymbol: { self.handlePickSymbol() },
+      onPickImage: { self.handlePickImage() },
       onClear: { self.handleClearIcon() }
     )
+  }
+
+  @objc private func handlePickImage() {
+    guard var a = currentAction() else { return }
+    let panel = NSOpenPanel()
+    panel.allowedContentTypes = CustomIcon.contentTypes
+    panel.canChooseFiles = true
+    panel.canChooseDirectories = false
+    panel.allowsMultipleSelection = false
+    if panel.runModal() == .OK {
+      DispatchQueue.main.async {
+        a.iconPath = panel.url?.path
+        self.onChange?(.action(a))
+        self.updateIcon(for: a)
+      }
+    }
   }
 
   @objc private func handlePickAppIcon() {
@@ -1241,8 +1258,25 @@ private class GroupCellView: NSTableCellView, NSWindowDelegate {
       anchor: anchor,
       onPickAppIcon: { self.handlePickAppIcon() },
       onPickSymbol: { self.handlePickSymbol() },
+      onPickImage: { self.handlePickImage() },
       onClear: { self.handleClearIcon() }
     )
+  }
+
+  @objc private func handlePickImage() {
+    guard var g = currentGroup() else { return }
+    let panel = NSOpenPanel()
+    panel.allowedContentTypes = CustomIcon.contentTypes
+    panel.canChooseFiles = true
+    panel.canChooseDirectories = false
+    panel.allowsMultipleSelection = false
+    if panel.runModal() == .OK {
+      DispatchQueue.main.async {
+        g.iconPath = panel.url?.path
+        self.onChange?(.group(g))
+        self.updateIcon(for: g)
+      }
+    }
   }
 
   @objc private func handlePickAppIcon() {

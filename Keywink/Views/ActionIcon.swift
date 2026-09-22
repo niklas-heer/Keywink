@@ -16,6 +16,8 @@ func actionIcon(item: ActionOrGroup, iconSize: NSSize, loadFavicons: Bool = true
   if let iconPath = iconPath, !iconPath.isEmpty {
     if iconPath.hasSuffix(".app") {
       return AnyView(AppIconImage(appPath: iconPath, size: iconSize))
+    } else if CustomIcon.isImagePath(iconPath) {
+      return AnyView(CustomIconImage(imagePath: iconPath, size: iconSize))
     } else {
       return AnyView(
         Image(systemName: iconPath)
