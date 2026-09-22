@@ -190,6 +190,12 @@ private class OutlineController: NSObject, NSOutlineViewDataSource, NSOutlineVie
         },
         onDelete: { [weak self] in
           guard let self = self else { return }
+          // A deleted first-level group must not keep its global shortcut registered.
+          if node.parent === self.rootNode, case .group(let group) = node.kind,
+            let key = group.key, !key.isEmpty
+          {
+            removeGroupShortcut(for: key)
+          }
           node.deleteFromParent()
           outlineView.reloadData()
           self.propagateRootChange()
@@ -346,11 +352,11 @@ private class OutlineController: NSObject, NSOutlineViewDataSource, NSOutlineVie
 
   private func saveCurrentExpandedState() {
     let set = collectExpandedPaths()
-    UserDefaults.standard.set(Array(set), forKey: expandedDefaultsKey)
+    defaultsSuite.set(Array(set), forKey: expandedDefaultsKey)
   }
 
   private func loadExpandedState() -> Set<String>? {
-    if let arr = UserDefaults.standard.array(forKey: expandedDefaultsKey) as? [String] {
+    if let arr = defaultsSuite.array(forKey: expandedDefaultsKey) as? [String] {
       return Set(arr)
     }
     return nil
@@ -1132,18 +1138,17 @@ private class GroupCellView: NSTableCellView, NSWindowDelegate {
     let hasValidKey = group.key != nil && !group.key!.isEmpty
 
     if isFirstLevel && hasValidKey, let key = group.key {
-      let recorder = KeyboardShortcuts.RecorderCocoa(for: KeyboardShortcuts.Name("group-\(key)")) {
-        _ in
-        // Update the groupShortcuts set when shortcut changes
-        let shortcutName = KeyboardShortcuts.Name("group-\(key)")
-        if KeyboardShortcuts.getShortcut(for: shortcutName) != nil {
+      let shortcutName = GlobalShortcuts.groupName(for: key)
+      let recorder = KeyboardShortcuts.RecorderCocoa(
+        shortcut: GlobalShortcuts.shortcut(for: shortcutName)
+      ) { shortcut in
+        GlobalShortcuts.set(shortcut, for: shortcutName)
+        if shortcut != nil {
           Defaults[.groupShortcuts].insert(key)
         } else {
           Defaults[.groupShortcuts].remove(key)
         }
-
-        // Re-register global shortcuts
-        (NSApplication.shared.delegate as! AppDelegate).registerGlobalShortcuts()
+        (NSApp.delegate as? AppDelegate)?.registerGlobalShortcuts()
       }
       recorder.translatesAutoresizingMaskIntoConstraints = false
       container.addSubview(recorder)
@@ -1215,10 +1220,7 @@ private class GroupCellView: NSTableCellView, NSWindowDelegate {
 
     // If key changed and there was a global shortcut, remove it
     if let oldKey = g.key, !oldKey.isEmpty, normalized != oldKey {
-      var shortcuts = Defaults[.groupShortcuts]
-      shortcuts.remove(oldKey)
-      Defaults[.groupShortcuts] = shortcuts
-      KeyboardShortcuts.reset([KeyboardShortcuts.Name("group-\(oldKey)")])
+      removeGroupShortcut(for: oldKey)
     }
 
     g.key = normalized
@@ -1302,6 +1304,14 @@ private class GroupCellView: NSTableCellView, NSWindowDelegate {
 }
 
 // MARK: - Editor Node
+
+/// Forgets the global shortcut of a first-level group and unregisters its hotkey.
+@MainActor
+private func removeGroupShortcut(for key: String) {
+  Defaults[.groupShortcuts].remove(key)
+  GlobalShortcuts.remove(GlobalShortcuts.groupName(for: key))
+  (NSApp.delegate as? AppDelegate)?.registerGlobalShortcuts()
+}
 
 private class EditorNode: NSObject {
   enum Kind {

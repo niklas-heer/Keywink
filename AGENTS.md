@@ -50,7 +50,7 @@ Keywink is a macOS application that provides customizable keyboard shortcuts. Th
 **Testing Architecture:**
 
 - Uses XCTest with custom `TestAlertManager` for UI testing
-- Tests use a process-private UserDefaults suite and temporary default configuration directory. Configuration fixtures inject their own directory accessors and fallback path; never delete or write the real user configuration directory in tests. App and updater startup are suppressed in the test host. Keep this isolation when adding tests.
+- Tests use a process-private UserDefaults suite and temporary default configuration directory. Configuration fixtures inject their own directory accessors and fallback path; never delete or write the real user configuration directory in tests. App and updater startup are suppressed in the test host. Global shortcuts go through `GlobalShortcuts`, which keeps them in memory in the test host because KeyboardShortcuts can only use `UserDefaults.standard`; never call its name-based storage directly. Keep this isolation when adding tests.
 - Focus on configuration validation and state management
 
 ## Code Style Guidelines

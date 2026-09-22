@@ -1,4 +1,5 @@
 import Cocoa
+import Combine
 import Defaults
 import KeyboardShortcuts
 import Settings
@@ -21,6 +22,8 @@ class AppDelegate: NSObject, NSApplicationDelegate,
 
   var state: UserState!
   private var updaterController: SPUStandardUpdaterController?
+  private var rootObservation: AnyCancellable?
+  private var registeredGroupKeys: Set<String> = []
 
   lazy var settingsWindowController = SettingsWindowController(
     panes: [
@@ -106,6 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     // Activation policy is managed solely by the Settings window
 
     registerGlobalShortcuts()
+    observeGroupShortcutChanges()
   }
 
   func activate() {
@@ -126,23 +130,47 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     }
   }
 
+  /// Registers the activation shortcut and one shortcut per first-level group that still
+  /// exists in the configuration. Stored shortcuts of deleted or renamed groups stay
+  /// unregistered, so they cannot grab their key combination anymore.
   @MainActor
   public func registerGlobalShortcuts() {
+    // The test host keeps shortcuts in memory; KeyboardShortcuts would read the real ones.
+    guard !isRunningTests() else { return }
     KeyboardShortcuts.removeAllHandlers()
 
     KeyboardShortcuts.onKeyDown(for: .activate) {
       self.activate()
     }
 
-    for groupKey in Defaults[.groupShortcuts] {
-      print("Registering shortcut for \(groupKey)")
-      KeyboardShortcuts.onKeyDown(for: KeyboardShortcuts.Name("group-\(groupKey)")) {
+    let groupKeys = GlobalShortcuts.activeGroupKeys(
+      in: config.root, stored: Defaults[.groupShortcuts])
+    registeredGroupKeys = groupKeys
+    for groupKey in groupKeys {
+      KeyboardShortcuts.onKeyDown(for: GlobalShortcuts.groupName(for: groupKey)) {
         self.controller.openRootGroup(for: groupKey)
       }
     }
-    if Defaults[.groupShortcuts].isEmpty && !KeyboardShortcuts.isEnabled(for: .activate) {
+    if groupKeys.isEmpty && !KeyboardShortcuts.isEnabled(for: .activate) {
       showSettings()
     }
+  }
+
+  /// Re-registers group shortcuts whenever the set of first-level groups with a shortcut
+  /// changes, for example after a reload, an import, or deleting a group in the editor.
+  private func observeGroupShortcutChanges() {
+    rootObservation = config.$root
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] _ in
+        MainActor.assumeIsolated {
+          guard let self else { return }
+          let groupKeys = GlobalShortcuts.activeGroupKeys(
+            in: self.config.root, stored: Defaults[.groupShortcuts])
+          if groupKeys != self.registeredGroupKeys {
+            self.registerGlobalShortcuts()
+          }
+        }
+      }
   }
 
   func applicationWillTerminate(_ notification: Notification) {

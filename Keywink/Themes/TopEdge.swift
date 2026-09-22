@@ -210,19 +210,19 @@ enum TopEdge {
       guard userState.navigationPath.isEmpty, case .group(let group) = item,
         let key = group.key, Defaults[.groupShortcuts].contains(key)
       else { return nil }
-      return KeyboardShortcuts.getShortcut(for: .init("group-\(key)"))
+      return GlobalShortcuts.shortcut(for: GlobalShortcuts.groupName(for: key))
     }
 
     private var sequenceHint: String {
       let path = userState.keyPath
       if let first = path.first, Defaults[.groupShortcuts].contains(first),
-        let shortcut = KeyboardShortcuts.getShortcut(for: .init("group-\(first)"))
+        let shortcut = GlobalShortcuts.shortcut(for: GlobalShortcuts.groupName(for: first))
       {
         return
           ([TopEdge.shortcutLabel(shortcut)] + path.dropFirst().map { KeyMaps.glyph(for: $0) ?? $0 })
           .joined(separator: " › ")
       }
-      let root = KeyboardShortcuts.getShortcut(for: .activate).map(TopEdge.shortcutLabel)
+      let root = GlobalShortcuts.shortcut(for: .activate).map(TopEdge.shortcutLabel)
       return ([root].compactMap { $0 } + path.map { KeyMaps.glyph(for: $0) ?? $0 })
         .joined(separator: " › ")
     }
