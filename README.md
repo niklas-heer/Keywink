@@ -1,3 +1,7 @@
+<p align="center">
+  <img alt="Keywink app icon" src="docs/images/icon.png" width="128">
+</p>
+
 # Keywink
 
 A native macOS command launcher driven by memorable key sequences. Press one shortcut, then type a few letters, and Keywink opens apps, URLs, folders, or runs commands. A compact on-screen guide shows what each key does, so you never have to memorise a shortcut table.
