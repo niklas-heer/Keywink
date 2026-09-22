@@ -79,6 +79,19 @@ final class UserConfigTests: XCTestCase {
     XCTAssertEqual(testAlertManager.shownAlerts.count, 0)
   }
 
+  func testLaunchLoadPopulatesRootBeforeReturning() throws {
+    configDirectoryStore.path = testDefaultDir
+    try FileManager.default.createDirectory(
+      atPath: testDefaultDir, withIntermediateDirectories: true)
+    try configData(key: "o", value: "https://example.com").write(to: subject.url)
+
+    // No waiting: a global shortcut may fire right after launch and must see the config.
+    subject.ensureAndLoad()
+
+    XCTAssertEqual(subject.root.actions.count, 1)
+    XCTAssertEqual(testAlertManager.shownAlerts.count, 0)
+  }
+
   func testGlobalGroupNavigationReplacesTheCurrentPath() {
     let nested = Group(key: "r", label: "Nested group", actions: [])
     let applications = Group(key: "g", label: "Applications", actions: [.group(nested)])

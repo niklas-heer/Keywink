@@ -63,7 +63,7 @@ class UserConfig: ObservableObject {
   func ensureAndLoad() {
     ensureValidConfigDirectory()
     ensureConfigFileExists()
-    loadConfig()
+    loadConfig(synchronously: true)
   }
 
   func reloadFromFile() {
@@ -394,8 +394,11 @@ class UserConfig: ObservableObject {
 
   // MARK: - Config Loading
 
+  /// Loads the configuration file. The launch path loads synchronously so the global
+  /// shortcut can never open an empty root group while the first read is still pending;
+  /// reloads stay asynchronous.
   private func loadConfig(
-    suppressAlerts: Bool = false, sendReloadEvent: Bool = false
+    suppressAlerts: Bool = false, sendReloadEvent: Bool = false, synchronously: Bool = false
   ) {
     invalidatePendingIO()
     let revision = ioRevision
@@ -411,48 +414,60 @@ class UserConfig: ObservableObject {
       return
     }
 
-    configIOQueue.async { [weak self] in
-      guard let self = self else { return }
-
-      do {
-        let configString = try self.readFile()
-
-        guard let jsonData = configString.data(using: .utf8) else {
-          throw NSError(
-            domain: "UserConfig",
-            code: 1,
-            userInfo: [
-              NSLocalizedDescriptionKey: "Failed to encode config file as UTF-8"
-            ]
-          )
-        }
-
-        let decoder = JSONDecoder()
-        let decodedRoot = try decoder.decode(Group.self, from: jsonData)
-        let checksum = self.calculateChecksum(configString)
-        let validationErrors = ConfigValidator.validate(group: decodedRoot)
-
-        DispatchQueue.main.async {
-          guard self.ioRevision == revision else { return }
-          self.root = decodedRoot
-          self.lastReadChecksum = checksum
-          self.setValidationErrors(validationErrors)
-          self.isLoading = false
-          if sendReloadEvent {
-            Events.send(.didReload)
-          }
-        }
-      } catch {
-        DispatchQueue.main.async {
-          guard self.ioRevision == revision else { return }
-          self.handleError(error, critical: false)
-          self.isLoading = false
-          if sendReloadEvent {
-            Events.send(.didReload)
-          }
-        }
+    let finish: (Result<LoadedConfig, Error>) -> Void = { [weak self] outcome in
+      guard let self = self, self.ioRevision == revision else { return }
+      switch outcome {
+      case .success(let loaded):
+        self.root = loaded.root
+        self.lastReadChecksum = loaded.checksum
+        self.setValidationErrors(loaded.validationErrors)
+      case .failure(let error):
+        self.handleError(error, critical: false)
+      }
+      self.isLoading = false
+      if sendReloadEvent {
+        Events.send(.didReload)
       }
     }
+
+    if synchronously {
+      let outcome = configIOQueue.sync { Result { try readAndDecodeConfig() } }
+      finish(outcome)
+      return
+    }
+
+    configIOQueue.async { [weak self] in
+      guard let self = self else { return }
+      let outcome = Result { try self.readAndDecodeConfig() }
+      DispatchQueue.main.async { finish(outcome) }
+    }
+  }
+
+  private struct LoadedConfig {
+    let root: Group
+    let checksum: String
+    let validationErrors: [ValidationError]
+  }
+
+  /// Reads and validates the configuration file. Call on `configIOQueue`.
+  private func readAndDecodeConfig() throws -> LoadedConfig {
+    let configString = try readFile()
+
+    guard let jsonData = configString.data(using: .utf8) else {
+      throw NSError(
+        domain: "UserConfig",
+        code: 1,
+        userInfo: [
+          NSLocalizedDescriptionKey: "Failed to encode config file as UTF-8"
+        ]
+      )
+    }
+
+    let root = try JSONDecoder().decode(Group.self, from: jsonData)
+    return LoadedConfig(
+      root: root,
+      checksum: calculateChecksum(configString),
+      validationErrors: ConfigValidator.validate(group: root))
   }
 
   private func invalidatePendingIO() {
