@@ -75,6 +75,32 @@ If Raycast or another utility supplies Hyper, keep it running and match its **In
 
 Counts follow key paths, so reassigning a key inherits that path's history until reset.
 
+## Configuration file
+
+Keywink stores its configuration as `config.json` under `~/Library/Application Support/Keywink/` (change the directory under **Settings → Advanced**). The editor writes the file on every change; edit it by hand and choose **Read from file** or `keywink://config-reload` to pick up external changes.
+
+Prefer comments and less punctuation? Switch **Settings → Advanced → Format** to TOML. Keywink rewrites the configuration as `config.toml`, keeps the JSON file as a backup, and uses TOML from then on. The fields are the same in both formats:
+
+```toml
+type = "group"
+
+[[actions]]
+key = "o"
+type = "group"
+label = "Open"
+
+  [[actions.actions]]
+  key = "s"
+  type = "application"
+  value = "/Applications/Safari.app"
+
+[[actions]]
+key = "e"
+type = "text"
+label = "Email"
+value = "hello@example.com"
+```
+
 ## Import from Leader Key
 
 Choose **Settings → General → Import Leader Key config…** and select the existing `config.json`, normally under `~/Library/Application Support/Leader Key/`. Keywink validates the file, backs up its current configuration, and copies the selection into its own directory. The original is left untouched.

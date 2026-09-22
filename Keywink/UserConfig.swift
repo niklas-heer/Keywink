@@ -2,6 +2,24 @@ import Cocoa
 import Combine
 import CryptoKit
 import Defaults
+import TOMLKit
+
+/// On-disk format of the configuration. JSON is the default and what Leader Key uses;
+/// TOML is opt-in for people who edit the file by hand and want comments.
+enum ConfigFormat: String, CaseIterable, Identifiable {
+  case json
+  case toml
+
+  var id: Self { self }
+  var fileName: String { "config.\(rawValue)" }
+  var displayName: String { rawValue.uppercased() }
+
+  /// TOML wins when both files exist, because converting leaves only a backup behind.
+  static func detect(in directory: String, fileManager: FileManager = .default) -> ConfigFormat {
+    let tomlPath = (directory as NSString).appendingPathComponent(ConfigFormat.toml.fileName)
+    return fileManager.fileExists(atPath: tomlPath) ? .toml : .json
+  }
+}
 
 let emptyRoot = Group(key: "🚫", label: "Config error", actions: [])
 
@@ -32,7 +50,8 @@ class UserConfig: ObservableObject {
   // O(1) lookup for row validation; keys are path strings like "1/0/3"
   @Published var validationErrorsByPath: [String: ValidationErrorType] = [:]
 
-  let fileName = "config.json"
+  @Published private(set) var format: ConfigFormat = .json
+  var fileName: String { format.fileName }
   private let alertHandler: AlertHandler
   private let fileManager: FileManager
   private let defaultDirectoryResolver: () -> String
@@ -62,13 +81,42 @@ class UserConfig: ObservableObject {
 
   func ensureAndLoad() {
     ensureValidConfigDirectory()
+    format = ConfigFormat.detect(in: configDirectoryReader(), fileManager: fileManager)
     ensureConfigFileExists()
     loadConfig(synchronously: true)
   }
 
   func reloadFromFile() {
     Events.send(.willReload)
+    format = ConfigFormat.detect(in: configDirectoryReader(), fileManager: fileManager)
     loadConfig(suppressAlerts: true, sendReloadEvent: true)
+  }
+
+  /// Rewrites the configuration in `newFormat`, keeps the previous file as a backup, and
+  /// returns the backup location. Does nothing when the format is already in use.
+  @discardableResult
+  func convert(to newFormat: ConfigFormat) throws -> URL? {
+    guard newFormat != format else { return nil }
+    let encoded = try Self.encode(root, as: newFormat)
+    let directory = URL(fileURLWithPath: configDirectoryReader(), isDirectory: true)
+    let oldURL = url
+    let newURL = directory.appendingPathComponent(newFormat.fileName)
+
+    invalidatePendingIO()
+    var backupURL: URL?
+    try configIOQueue.sync {
+      if fileManager.fileExists(atPath: oldURL.path) {
+        let candidate = directory.appendingPathComponent(
+          "\(oldURL.lastPathComponent).backup-\(UUID().uuidString)")
+        try fileManager.moveItem(at: oldURL, to: candidate)
+        backupURL = candidate
+      }
+      try encoded.write(to: newURL, options: .atomic)
+    }
+
+    format = newFormat
+    lastReadChecksum = calculateChecksum(encoded)
+    return backupURL
   }
 
   @discardableResult
@@ -80,12 +128,14 @@ class UserConfig: ObservableObject {
       throw ConfigImportError.sourceMatchesDestination
     }
 
-    let data = try Data(contentsOf: sourceURL)
-    let importedRoot = try JSONDecoder().decode(Group.self, from: data)
+    let sourceData = try Data(contentsOf: sourceURL)
+    let importedRoot = try JSONDecoder().decode(Group.self, from: sourceData)
     let errors = ConfigValidator.validate(group: importedRoot)
     guard errors.isEmpty else {
       throw ConfigImportError.validationFailed(errors)
     }
+    // A JSON destination receives the file byte for byte; TOML needs re-encoding.
+    let data = format == .json ? sourceData : try Self.encode(importedRoot, as: format)
 
     invalidatePendingIO()
     Events.send(.willReload)
@@ -146,11 +196,7 @@ class UserConfig: ObservableObject {
     setValidationErrors(ConfigValidator.validate(group: root))
 
     do {
-      let encoder = JSONEncoder()
-      encoder.outputFormatting = [
-        .prettyPrinted, .withoutEscapingSlashes, .sortedKeys,
-      ]
-      let jsonData = try encoder.encode(root)
+      let jsonData = try Self.encode(root, as: format)
 
       try writeFile(data: jsonData)
 
@@ -167,16 +213,13 @@ class UserConfig: ObservableObject {
 
     // Create a new debounced save work item
     let currentRoot = root
+    let currentFormat = format
     let revision = ioRevision
     let workItem = DispatchWorkItem { [weak self] in
       guard let self = self else { return }
 
-      // Perform file I/O on background queue
-      let encoder = JSONEncoder()
-      encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes, .sortedKeys]
-
       do {
-        let jsonData = try encoder.encode(currentRoot)
+        let jsonData = try Self.encode(currentRoot, as: currentFormat)
 
         // Check conflicts on background queue first, then switch to main for UI
         if let lastChecksum = self.lastReadChecksum, self.exists {
@@ -359,6 +402,34 @@ class UserConfig: ObservableObject {
     try String(contentsOfFile: path, encoding: .utf8)
   }
 
+  // MARK: - Encoding
+
+  static func encode(_ root: Group, as format: ConfigFormat) throws -> Data {
+    switch format {
+    case .json:
+      let encoder = JSONEncoder()
+      encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes, .sortedKeys]
+      return try encoder.encode(root)
+    case .toml:
+      let table: TOMLTable = try TOMLEncoder().encode(root)
+      return Data(table.convert(to: .toml).utf8)
+    }
+  }
+
+  static func decode(_ text: String, as format: ConfigFormat) throws -> Group {
+    switch format {
+    case .json:
+      guard let data = text.data(using: .utf8) else {
+        throw NSError(
+          domain: "UserConfig", code: 1,
+          userInfo: [NSLocalizedDescriptionKey: "Failed to encode config file as UTF-8"])
+      }
+      return try JSONDecoder().decode(Group.self, from: data)
+    case .toml:
+      return try TOMLDecoder().decode(Group.self, from: text)
+    }
+  }
+
   private func calculateChecksum(_ content: String) -> String {
     let data = Data(content.utf8)
     return calculateChecksum(data)
@@ -452,18 +523,7 @@ class UserConfig: ObservableObject {
   /// Reads and validates the configuration file. Call on `configIOQueue`.
   private func readAndDecodeConfig() throws -> LoadedConfig {
     let configString = try readFile()
-
-    guard let jsonData = configString.data(using: .utf8) else {
-      throw NSError(
-        domain: "UserConfig",
-        code: 1,
-        userInfo: [
-          NSLocalizedDescriptionKey: "Failed to encode config file as UTF-8"
-        ]
-      )
-    }
-
-    let root = try JSONDecoder().decode(Group.self, from: jsonData)
+    let root = try Self.decode(configString, as: format)
     return LoadedConfig(
       root: root,
       checksum: calculateChecksum(configString),

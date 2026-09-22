@@ -324,6 +324,96 @@ final class UserConfigTests: XCTestCase {
     try assertSamePersistedConfig(subject.root, expectedRoot)
   }
 
+  // MARK: - TOML
+
+  func testLoadsAndSavesTomlWhenThatFileExists() throws {
+    configDirectoryStore.path = testDefaultDir
+    try FileManager.default.createDirectory(
+      atPath: testDefaultDir, withIntermediateDirectories: true)
+    let toml = """
+      # Keywink configuration
+      type = "group"
+
+      [[actions]]
+      key = "o"
+      type = "url"
+      label = "Example"
+      value = "https://example.com"
+
+      [[actions]]
+      key = "g"
+      type = "group"
+
+        [[actions.actions]]
+        key = "t"
+        type = "command"
+        value = "echo hi"
+      """
+    try toml.write(
+      toFile: (testDefaultDir as NSString).appendingPathComponent("config.toml"), atomically: true,
+      encoding: .utf8)
+
+    subject.ensureAndLoad()
+
+    XCTAssertEqual(subject.format, .toml)
+    XCTAssertEqual(subject.url.lastPathComponent, "config.toml")
+    XCTAssertEqual(subject.root.actions.count, 2)
+    XCTAssertEqual(testAlertManager.shownAlerts.count, 0)
+    guard case .group(let group) = subject.root.actions[1],
+      case .action(let nested) = group.actions[0]
+    else { return XCTFail("expected a nested command") }
+    XCTAssertEqual(nested.value, "echo hi")
+
+    subject.root = Group(
+      key: nil, actions: [.action(Action(key: "x", type: .command, value: "echo saved"))])
+    waitForAsyncIO()
+
+    let saved = try String(contentsOf: subject.url, encoding: .utf8)
+    XCTAssertTrue(saved.contains("[[actions]]"), saved)
+    XCTAssertTrue(saved.contains("echo saved"), saved)
+    try assertSamePersistedConfig(try UserConfig.decode(saved, as: .toml), subject.root)
+  }
+
+  func testConvertsBetweenJsonAndTomlKeepingABackup() throws {
+    subject.ensureAndLoad()
+    XCTAssertEqual(subject.format, .json)
+    let original = subject.root
+    let jsonURL = subject.url
+
+    let backupURL = try XCTUnwrap(subject.convert(to: .toml))
+
+    XCTAssertEqual(subject.format, .toml)
+    XCTAssertTrue(FileManager.default.fileExists(atPath: subject.url.path))
+    XCTAssertFalse(FileManager.default.fileExists(atPath: jsonURL.path))
+    XCTAssertTrue(backupURL.lastPathComponent.hasPrefix("config.json.backup-"))
+    XCTAssertNil(try subject.convert(to: .toml), "converting to the current format is a no-op")
+
+    subject.reloadFromFile()
+    waitForConfigLoad()
+    XCTAssertEqual(subject.format, .toml)
+    try assertSamePersistedConfig(subject.root, original)
+
+    try subject.convert(to: .json)
+    XCTAssertEqual(subject.format, .json)
+    XCTAssertTrue(FileManager.default.fileExists(atPath: jsonURL.path))
+    try assertSamePersistedConfig(
+      try JSONDecoder().decode(Group.self, from: Data(contentsOf: jsonURL)), original)
+  }
+
+  func testImportIntoTomlConfigWritesToml() throws {
+    subject.ensureAndLoad()
+    try subject.convert(to: .toml)
+    let sourceURL = URL(fileURLWithPath: tempBaseDir).appendingPathComponent("leader.json")
+    try configData(key: "x", value: "https://example.com/imported").write(to: sourceURL)
+
+    try subject.importConfig(from: sourceURL)
+
+    let written = try String(contentsOf: subject.url, encoding: .utf8)
+    XCTAssertTrue(written.contains("[[actions]]"), written)
+    XCTAssertTrue(written.contains("https://example.com/imported"), written)
+    XCTAssertEqual(subject.root.actions.count, 1)
+  }
+
   func testRuntimeEnvironmentDetectsEveryXCTestMarker() {
     XCTAssertTrue(
       RuntimeEnvironment.isRunningTests(

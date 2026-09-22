@@ -46,6 +46,18 @@ struct AdvancedPane: View {
             configDir = UserConfig.defaultDirectory()
           }
         }
+        HStack(alignment: .firstTextBaseline) {
+          Picker("Format", selection: formatSelection) {
+            ForEach(ConfigFormat.allCases) { format in
+              Text(format.displayName).tag(format)
+            }
+          }
+          .frame(width: 160)
+          Text("Converting keeps the previous file as a backup.")
+            .font(.caption)
+            .foregroundColor(.secondary)
+        }
+        .padding(.top, 4)
       }
 
       Settings.Section(
@@ -164,6 +176,22 @@ struct AdvancedPane: View {
         }
       }
     }
+  }
+}
+
+extension AdvancedPane {
+  fileprivate var formatSelection: Binding<ConfigFormat> {
+    Binding(
+      get: { config.format },
+      set: { newFormat in
+        do {
+          try config.convert(to: newFormat)
+        } catch {
+          let alert = NSAlert(error: error)
+          alert.messageText = "Could not convert the configuration"
+          alert.runModal()
+        }
+      })
   }
 }
 

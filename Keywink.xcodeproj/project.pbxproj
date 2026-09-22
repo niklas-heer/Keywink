@@ -35,6 +35,7 @@
 		427C17FD2BD311B500955B98 /* UserConfigTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 427C17FC2BD311B500955B98 /* UserConfigTests.swift */; };
 		427C18172BD311ED00955B98 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 427C18162BD311ED00955B98 /* KeyboardShortcuts */; };
 		427C181A2BD3123C00955B98 /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 427C18192BD3123C00955B98 /* Defaults */; };
+		A0B1C2D3E4F5061728394B03 /* TOMLKit in Frameworks */ = {isa = PBXBuildFile; productRef = A0B1C2D3E4F5061728394B02 /* TOMLKit */; };
 		427C181C2BD314B500955B98 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 427C181B2BD314B500955B98 /* Constants.swift */; };
 		A0B1C2D3E4F5061728394A01 /* GlobalShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A02 /* GlobalShortcuts.swift */; };
 		A0B1C2D3E4F5061728394A0D /* KeySimulator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A0E /* KeySimulator.swift */; };
@@ -152,6 +153,7 @@
 				427C18232BD31DF100955B98 /* Settings in Frameworks */,
 				115AA5C22DA546D500C17E18 /* SymbolPicker in Frameworks */,
 				427C181A2BD3123C00955B98 /* Defaults in Frameworks */,
+				A0B1C2D3E4F5061728394B03 /* TOMLKit in Frameworks */,
 				4279AFED2C6A175500952A83 /* LaunchAtLogin in Frameworks */,
 				427C18172BD311ED00955B98 /* KeyboardShortcuts in Frameworks */,
 			);
@@ -328,6 +330,7 @@
 				42E70A562C823FF200FCF902 /* Sparkle */,
 				115AA5C12DA546D500C17E18 /* SymbolPicker */,
 				FBCA04D82D9F02F700271163 /* Kingfisher */,
+				A0B1C2D3E4F5061728394B02 /* TOMLKit */,
 			);
 			productName = Keywink;
 			productReference = 427C17E72BD311B400955B98 /* Keywink.app */;
@@ -387,6 +390,7 @@
 				4279AFEB2C6A175500952A83 /* XCRemoteSwiftPackageReference "LaunchAtLogin-Modern" */,
 				115AA5C02DA5463700C17E18 /* XCRemoteSwiftPackageReference "SymbolPicker" */,
 				FB00D5262D824E2C00A37486 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				A0B1C2D3E4F5061728394B01 /* XCRemoteSwiftPackageReference "TOMLKit" */,
 			);
 			productRefGroup = 427C17E82BD311B400955B98 /* Products */;
 			projectDirPath = "";
@@ -820,6 +824,14 @@
 				minimumVersion = 8.3.0;
 			};
 		};
+		A0B1C2D3E4F5061728394B01 /* XCRemoteSwiftPackageReference "TOMLKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/LebJe/TOMLKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -857,6 +869,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = FB00D5262D824E2C00A37486 /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		A0B1C2D3E4F5061728394B02 /* TOMLKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0B1C2D3E4F5061728394B01 /* XCRemoteSwiftPackageReference "TOMLKit" */;
+			productName = TOMLKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
