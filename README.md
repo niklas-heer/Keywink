@@ -39,6 +39,8 @@ Keywink requires macOS 13 Ventura or later and runs natively on Apple Silicon an
 3. Add actions and groups in the configuration editor. Each item gets a single key.
 4. Press your shortcut, then the keys. **Escape** dismisses the guide.
 
+**Settings → General → Repeat last action** records a second shortcut that runs the previous action again without opening the guide. **Settings → Advanced → Hide an app that is already in front** turns application actions into toggles.
+
 Actions can be applications, URLs, folders, shell commands, typed text, or key shortcuts sent to the app you were in.
 
 ## Text and shortcut actions
@@ -57,7 +59,7 @@ The guide sits in the middle of the active display and keeps a steady width and 
 
 - **Backspace** or the back arrow moves up one level. At the root it does nothing.
 - **Escape** hides the guide.
-- Labels that start with an emoji use it as the icon.
+- Labels that start with an emoji use it as the icon. The icon menu also offers app icons, SF Symbols, and image files (PNG, JPEG, ICNS).
 - **Settings → General → Theme** switches to the other themes inherited from Leader Key. Existing "Top Edge" selections map to Key Guide.
 
 ## Groups and Hyper shortcuts
@@ -113,6 +115,7 @@ Only the JSON configuration is imported. Record your activation shortcut and pre
 open 'keywink://activate'
 open 'keywink://hide'
 open 'keywink://reset'
+open 'keywink://repeat'
 open 'keywink://settings'
 open 'keywink://about'
 open 'keywink://config-reload'
@@ -122,6 +125,25 @@ open 'keywink://navigate?keys=a,b,c&execute=false'
 ```
 
 Unknown commands show the launcher. Keywink does not register or handle Leader Key's URL scheme.
+
+## Compared to Leader Key
+
+Keywink started as a fork of [Leader Key](https://github.com/mikker/LeaderKey), whose upstream issues and pull requests were open and unanswered for months. Beyond the Key Guide theme and usage statistics, these upstream reports are addressed here:
+
+| Upstream | What Keywink does |
+| --- | --- |
+| [#304](https://github.com/mikker/LeaderKey/issues/304), [PR #313](https://github.com/mikker/LeaderKey/pull/313) | Tests run against a private preferences suite, temporary configuration directories, and in-memory global shortcuts, so they never touch your data. |
+| [#289](https://github.com/mikker/LeaderKey/issues/289), [#290](https://github.com/mikker/LeaderKey/issues/290) | Deleting or renaming a group releases its global shortcut. Shortcuts of groups that no longer exist are not registered. |
+| [#321](https://github.com/mikker/LeaderKey/issues/321) | The configuration is loaded before the global shortcut is registered, so the first activation never shows an empty root. |
+| [#223](https://github.com/mikker/LeaderKey/issues/223) | Sticky mode survives an action that brings another app to the front. |
+| [#163](https://github.com/mikker/LeaderKey/issues/163) | A **Repeat last action** shortcut and `keywink://repeat`. |
+| [#96](https://github.com/mikker/LeaderKey/issues/96), [#189](https://github.com/mikker/LeaderKey/issues/189) | Optional toggle behaviour: an application action hides the app when it is already in front. |
+| [#322](https://github.com/mikker/LeaderKey/issues/322), [#316](https://github.com/mikker/LeaderKey/issues/316) | **Text** and **Shortcut** actions type into, or press a key combination in, the app you came from. |
+| [PR #300](https://github.com/mikker/LeaderKey/pull/300) | Image files as icons for actions and groups. |
+| [#68](https://github.com/mikker/LeaderKey/issues/68), [PR #303](https://github.com/mikker/LeaderKey/pull/303) | Optional TOML configuration with the same fields as JSON. |
+| [#262](https://github.com/mikker/LeaderKey/issues/262), [#259](https://github.com/mikker/LeaderKey/issues/259), [#204](https://github.com/mikker/LeaderKey/issues/204), [#185](https://github.com/mikker/LeaderKey/issues/185) | Already handled by Keywink's rewritten editor and settings: uppercase keys, groups that stay expanded while editing, sorting, and showing the guide on the screen with the mouse. |
+
+Keywink is not affiliated with Leader Key. Leader Key configurations can be imported (see above); nothing is shared automatically.
 
 ## Development
 
