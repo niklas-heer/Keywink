@@ -21,7 +21,9 @@ Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderK
 - **Key Guide.** A centered, single-column guide styled after editor completion lists: key badge first, then icon and name, with global shortcut hints on the right. Native materials, light and dark appearance, reduced motion and transparency respected.
 - **Hyper group shortcuts.** Bind a global shortcut, such as Hyper+G, straight to a group and jump into it with one press. The guide shows **✦** for Hyper (Control–Option–Shift–Command).
 - **Local usage statistics.** See which shortcuts you use from which app, and optionally rank the guide by frequency. Counts never leave your Mac.
-- **Plain JSON configuration** with a built-in editor, validation, and automatic saving.
+- **Text and shortcut actions.** Type a snippet or press a key combination in the app you came from, next to apps, URLs, folders, and commands.
+- **Repeat and toggle.** A shortcut repeats the last action; optionally an application action hides the app that is already in front.
+- **JSON, TOML, or KDL configuration** with a built-in editor, validation, automatic saving, conversion between formats, and import from any of them. Icons can be apps, SF Symbols, or image files.
 - **Automation** through `keywink://` URLs.
 
 ## Install
