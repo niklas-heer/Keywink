@@ -551,6 +551,15 @@ enum Type: String, Codable {
   case url
   case command
   case folder
+  /// Types the value into the frontmost app. Needs Accessibility permission.
+  case text
+  /// Presses a key combination such as "cmd+shift+4" in the frontmost app.
+  case shortcut
+}
+
+extension Type {
+  /// Actions that send keyboard input to the frontmost application.
+  var sendsKeyboardInput: Bool { self == .text || self == .shortcut }
 }
 
 protocol Item {
@@ -588,6 +597,11 @@ struct Action: Item, Codable, Equatable {
       return (value as NSString).lastPathComponent
     case .url:
       return "URL"
+    case .text:
+      let firstLine = value.split(whereSeparator: \.isNewline).first.map(String.init) ?? value
+      return firstLine.count > 24 ? String(firstLine.prefix(24)) + "…" : firstLine
+    case .shortcut:
+      return value
     default:
       return value
     }

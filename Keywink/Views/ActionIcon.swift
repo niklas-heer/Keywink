@@ -52,6 +52,16 @@ func actionIcon(item: ActionOrGroup, iconSize: NSSize, loadFavicons: Bool = true
         Image(systemName: "folder")
           .foregroundStyle(.secondary)
           .frame(width: iconSize.width, height: iconSize.height, alignment: .center))
+    case .text:
+      return AnyView(
+        Image(systemName: "text.cursor")
+          .foregroundStyle(.secondary)
+          .frame(width: iconSize.width, height: iconSize.height, alignment: .center))
+    case .shortcut:
+      return AnyView(
+        Image(systemName: "keyboard")
+          .foregroundStyle(.secondary)
+          .frame(width: iconSize.width, height: iconSize.height, alignment: .center))
     default:
       return AnyView(
         Image(systemName: "questionmark")

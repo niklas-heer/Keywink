@@ -15,6 +15,7 @@ enum ValidationErrorType {
   case emptyKey
   case nonSingleCharacterKey
   case duplicateKey
+  case invalidValue
 }
 
 class ConfigValidator {
@@ -46,6 +47,7 @@ class ConfigValidator {
         key = action.key
         // Validate the key for actions
         validateKey(key, at: currentPath, errors: &errors)
+        validateValue(of: action, at: currentPath, errors: &errors)
       case .group(let subgroup):
         key = subgroup.key
         // Recursively validate subgroups
@@ -77,6 +79,29 @@ class ConfigValidator {
           keysInGroup[normalizedKey] = index
         }
       }
+    }
+  }
+
+  private static func validateValue(
+    of action: Action, at path: [Int], errors: inout [ValidationError]
+  ) {
+    switch action.type {
+    case .shortcut:
+      do {
+        _ = try KeySimulator.parse(action.value)
+      } catch let error as KeySimulator.ParseError {
+        errors.append(ValidationError(path: path, message: error.message, type: .invalidValue))
+      } catch {
+        errors.append(
+          ValidationError(path: path, message: "Invalid shortcut", type: .invalidValue))
+      }
+    case .text:
+      if action.value.isEmpty {
+        errors.append(
+          ValidationError(path: path, message: "Text to type is empty", type: .invalidValue))
+      }
+    default:
+      break
     }
   }
 

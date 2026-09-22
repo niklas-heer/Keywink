@@ -241,7 +241,8 @@ class Controller {
     case .action(let action):
       if execute {
         recordActionUse(action, parentPath: userState.keyPath)
-        if let mods = modifiers, isInStickyMode(mods) {
+        // Typed text and shortcuts must reach the app under the panel, so they always close it.
+        if let mods = modifiers, isInStickyMode(mods), !action.type.sendsKeyboardInput {
           stickyGraceDeadline = Date().addingTimeInterval(Controller.stickyGracePeriod)
           runAction(action)
         } else {
@@ -425,6 +426,18 @@ class Controller {
     case .folder:
       let path: String = (action.value as NSString).expandingTildeInPath
       NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: path)
+    case .text:
+      guard ensureAccessibilityPermission() else { break }
+      KeySimulator.type(action.value)
+    case .shortcut:
+      guard ensureAccessibilityPermission() else { break }
+      do {
+        KeySimulator.press(try KeySimulator.parse(action.value))
+      } catch let error as KeySimulator.ParseError {
+        showAlert(title: "Invalid shortcut", message: "\(error.message): \(action.value)")
+      } catch {
+        showAlert(title: "Invalid shortcut", message: action.value)
+      }
     default:
       print("\(action.type) unknown")
     }
@@ -436,6 +449,18 @@ class Controller {
 
   private func clear() {
     userState.clear()
+  }
+
+  /// Text and shortcut actions need Accessibility permission. The system prompt appears on
+  /// the first attempt; afterwards an alert points to the setting.
+  private func ensureAccessibilityPermission() -> Bool {
+    if KeySimulator.isTrusted(prompt: true) { return true }
+    showAlert(
+      title: "Accessibility permission needed",
+      message:
+        "Allow Keywink under System Settings › Privacy & Security › Accessibility to type text and press shortcuts in other apps, then run the action again."
+    )
+    return false
   }
 
   private func openURL(_ action: Action) {

@@ -39,7 +39,13 @@ Keywink requires macOS 13 Ventura or later and runs natively on Apple Silicon an
 3. Add actions and groups in the configuration editor. Each item gets a single key.
 4. Press your shortcut, then the keys. **Escape** dismisses the guide.
 
-Actions can be applications, URLs, folders, or shell commands.
+Actions can be applications, URLs, folders, shell commands, typed text, or key shortcuts sent to the app you were in.
+
+## Text and shortcut actions
+
+A **Text** action types its value into the frontmost app, so a snippet like a sign-off or an email address is one key sequence away. A **Shortcut** action presses a key combination there instead, for example `cmd+shift+4` for a screenshot or `⌘⇧T` to reopen a tab. Modifiers are `cmd`, `shift`, `alt`/`opt`, `ctrl`, `fn`, and `hyper`; keys are letters, digits, punctuation, `space`, `return`, `tab`, `escape`, `backspace`, `delete` (forward), arrows, and `f1` to `f12`. Glyphs such as `⌘⇧4` work too.
+
+Both actions need the Accessibility permission. macOS asks the first time one runs; afterwards allow Keywink under **System Settings → Privacy & Security → Accessibility**. Keywink closes its guide before sending input, so these actions always end sticky mode.
 
 ## Key Guide
 
