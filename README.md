@@ -101,6 +101,7 @@ mise run build     # unsigned Debug build
 mise run test      # isolated test suite
 mise run check     # strict lint, script syntax, and tests (what CI runs)
 mise run format    # rewrite Swift sources in place
+mise run snapshots # render the Settings panes to build/snapshots/*.png
 ```
 
 Tests use temporary configuration directories and a process-private preferences domain, so they never touch your real configuration. See [AGENTS.md](AGENTS.md) for the architecture and coding guidelines, and [RELEASE.md](RELEASE.md) for signing, notarization, and packaging.

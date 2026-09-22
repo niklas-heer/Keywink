@@ -13,6 +13,7 @@ Keywink is an independent fork of Leader Key. Read [README.md](README.md) for fo
 - Run required checks: `mise run check` (strict formatting, native tests, and script syntax)
 - Run single test: `xcodebuild -scheme "Keywink" -testPlan "TestPlan" '-only-testing:KeywinkTests/UserConfigTests/testInitializesWithDefaults' -derivedDataPath build CODE_SIGNING_ALLOWED=NO test`
 - Format source explicitly: `mise run format` (builds never rewrite source)
+- Render the Settings panes for review: `mise run snapshots` (writes `build/snapshots/pane-*.png`; AppKit-backed controls render as placeholders)
 - Set release version: `bin/bump <marketing-version> <build-number>`
 - Prepare signed, notarized artifacts: `mise run release` (requires the configuration in RELEASE.md; does not publish)
 

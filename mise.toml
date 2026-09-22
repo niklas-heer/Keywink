@@ -23,6 +23,20 @@ xcodebuild test \
   CODE_SIGNING_ALLOWED=NO
 '''
 
+[tasks.snapshots]
+description = "Render every Settings pane to build/snapshots/pane-*.png for review"
+run = '''
+TEST_RUNNER_KEYWINK_SNAPSHOT_DIR="$PWD/build/snapshots" xcodebuild test \
+  -project "Keywink.xcodeproj" \
+  -scheme "Keywink" \
+  -destination "platform=macOS" \
+  -testPlan "TestPlan" \
+  -derivedDataPath build \
+  -only-testing:KeywinkTests/SettingsPaneSnapshotTests \
+  CODE_SIGNING_ALLOWED=NO \
+  && ls build/snapshots
+'''
+
 [tasks.format]
 description = "Format Swift sources in place"
 run = '''
