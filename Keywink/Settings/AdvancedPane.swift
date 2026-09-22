@@ -62,26 +62,24 @@ struct AdvancedPane: View {
             .labelsHidden()
           }
 
-          VStack(alignment: .leading, spacing: 8) {
-            Text(
-              "Group Actions: When the modifier key is held while pressing a group key, it runs all actions in that group and its sub-groups."
-            )
-            .font(.callout)
-            .foregroundColor(.secondary)
-          }
-
-          VStack(alignment: .leading, spacing: 8) {
-            Text(
-              "Sticky Mode: When the modifier key is held while triggering an action, Keywink stays open after the action completes."
-            )
-            .font(.callout)
-            .foregroundColor(.secondary)
-          }
+          Text(
+            "Hold \(modifierKeyConfiguration.groupModifierGlyph) while pressing a group key to run every action in that group and its subgroups. Hold \(modifierKeyConfiguration.stickyModifierGlyph) while choosing an action to keep Keywink open afterwards."
+          )
+          .font(.callout)
+          .foregroundColor(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.top, 2)
       }
 
       Settings.Section(title: "Cheatsheet", bottomDivider: true) {
+        Text(
+          "Key Guide lists shortcuts on its own. These settings apply to the other themes."
+        )
+        .font(.caption)
+        .foregroundColor(.secondary)
+        .padding(.bottom, 4)
+
         HStack(alignment: .firstTextBaseline) {
           Picker("Show", selection: $autoOpenCheatsheet) {
             Text("Always").tag(AutoOpenCheatsheetSetting.always)
@@ -100,10 +98,8 @@ struct AdvancedPane: View {
           Spacer()
         }
 
-        Text(
-          "The cheatsheet can always be manually shown by \"?\" when Keywink is activated."
-        )
-        .padding(.vertical, 2)
+        Text("Press ? while Keywink is open to show the cheatsheet at any time.")
+          .padding(.vertical, 2)
 
         Defaults.Toggle(
           "Show expanded groups in cheatsheet", key: .expandGroupsInCheatsheet)

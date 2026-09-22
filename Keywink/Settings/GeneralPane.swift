@@ -83,8 +83,6 @@ struct GeneralPane: View {
               }
             }
           }
-
-          Button("Import Leader Key config…", action: importLeaderKeyConfig)
         }
       }
 
@@ -100,8 +98,20 @@ struct GeneralPane: View {
         }.frame(maxWidth: 170).labelsHidden()
       }
 
-      Settings.Section(title: "App") {
+      Settings.Section(title: "App", bottomDivider: true) {
         LaunchAtLogin.Toggle()
+      }
+
+      Settings.Section(title: "Import", verticalAlignment: .top) {
+        VStack(alignment: .leading, spacing: 4) {
+          Button("Import Leader Key config…", action: importLeaderKeyConfig)
+          Text(
+            "Validates a Leader Key config.json and copies it into Keywink. Your current configuration is backed up first."
+          )
+          .font(.caption)
+          .foregroundColor(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+        }
       }
     }
   }

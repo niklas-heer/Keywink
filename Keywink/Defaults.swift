@@ -94,6 +94,22 @@ enum ModifierKeyConfig: String, Codable, Defaults.Serializable, CaseIterable, Id
       return "⌥ Group sequences, ⌃ Sticky mode"
     }
   }
+
+  /// Glyph of the modifier that runs a whole group.
+  var groupModifierGlyph: String {
+    switch self {
+    case .controlGroupOptionSticky: return "⌃"
+    case .optionGroupControlSticky: return "⌥"
+    }
+  }
+
+  /// Glyph of the modifier that keeps Keywink open after an action.
+  var stickyModifierGlyph: String {
+    switch self {
+    case .controlGroupOptionSticky: return "⌥"
+    case .optionGroupControlSticky: return "⌃"
+    }
+  }
 }
 
 enum ReactivateBehavior: String, Defaults.Serializable {
