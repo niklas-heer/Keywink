@@ -144,6 +144,16 @@ struct AdvancedPane: View {
         Defaults.Toggle("Show Keywink in menubar", key: .showMenuBarIcon)
         VStack(alignment: .leading, spacing: 4) {
           Defaults.Toggle(
+            "Hide an app that is already in front", key: .hideFrontmostApplication)
+          Text(
+            "An application action then works as a toggle: it hides the app instead of activating it again."
+          )
+          .font(.caption)
+          .foregroundColor(.secondary)
+          .fixedSize(horizontal: false, vertical: true)
+        }
+        VStack(alignment: .leading, spacing: 4) {
+          Defaults.Toggle(
             "Force English keyboard layout", key: .forceEnglishKeyboardLayout)
           Text(
             "When enabled, letter keys are interpreted in US-English (QWERTY) regardless of your current keyboard layout."

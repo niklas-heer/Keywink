@@ -24,6 +24,15 @@ class Controller {
   var window: MainWindow!
   var cheatsheetWindow: NSWindow!
   private var cheatsheetTimer: Timer?
+  private let actionRunner: ((Action) -> Void)?
+
+  /// The most recent action the user ran, for the repeat shortcut and URL.
+  private(set) var lastAction: Action?
+
+  /// While a sticky-mode action is running, another app may take focus. Until this deadline
+  /// passes the panel re-takes key status instead of hiding (upstream Leader Key issue #223).
+  private var stickyGraceDeadline: Date?
+  static let stickyGracePeriod: TimeInterval = 1.5
 
   private var cancellables = Set<AnyCancellable>()
 
@@ -33,12 +42,14 @@ class Controller {
     sourceApplication: @escaping () -> (id: String, name: String) = {
       let app = NSWorkspace.shared.frontmostApplication
       return (app?.bundleIdentifier ?? "unknown", app?.localizedName ?? "Unknown application")
-    }
+    },
+    actionRunner: ((Action) -> Void)? = nil
   ) {
     self.userState = userState
     self.userConfig = userConfig
     self.usage = usage
     self.sourceApplication = sourceApplication
+    self.actionRunner = actionRunner
 
     Task {
       for await value in Defaults.updates(.theme) {
@@ -113,7 +124,35 @@ class Controller {
     usage.recordGroup(path: userState.keyPath, appID: appID)
   }
 
+  /// Runs the last action again without showing the panel.
+  func repeatLastAction() {
+    guard let action = lastAction else {
+      NSSound.beep()
+      return
+    }
+    runAction(action)
+  }
+
+  /// Windows call this when they stop being key. During the sticky grace period the panel
+  /// stays open and takes key status back, so a launched app does not end sticky mode.
+  func windowDidResignKey() {
+    guard shouldStayOpenAfterResigningKey(now: Date()) else {
+      hide()
+      return
+    }
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+      guard let self, self.window.isVisible else { return }
+      self.window.makeKeyAndOrderFront(nil)
+    }
+  }
+
+  func shouldStayOpenAfterResigningKey(now: Date) -> Bool {
+    guard let deadline = stickyGraceDeadline else { return false }
+    return now < deadline
+  }
+
   func hide(afterClose: (() -> Void)? = nil) {
+    stickyGraceDeadline = nil
     Events.send(.willDeactivate)
 
     window.hide {
@@ -158,6 +197,7 @@ class Controller {
         self.positionCheatsheetWindow()
       }
     case KeyHelpers.escape.rawValue:
+      stickyGraceDeadline = nil
       window.resignKey()
     default:
       guard let char = charForEvent(event) else { return }
@@ -202,6 +242,7 @@ class Controller {
       if execute {
         recordActionUse(action, parentPath: userState.keyPath)
         if let mods = modifiers, isInStickyMode(mods) {
+          stickyGraceDeadline = Date().addingTimeInterval(Controller.stickyGracePeriod)
           runAction(action)
         } else {
           hide {
@@ -350,9 +391,30 @@ class Controller {
     usage.recordAction(path: parentPath + [key], appID: appID)
   }
 
+  /// True when `frontmostBundleURL` is the application bundle at `actionValue`.
+  static func isSameApplication(_ frontmostBundleURL: URL?, _ actionValue: String) -> Bool {
+    guard let frontmostBundleURL else { return false }
+    let action = URL(fileURLWithPath: (actionValue as NSString).expandingTildeInPath)
+    return frontmostBundleURL.standardizedFileURL.resolvingSymlinksInPath().path
+      == action.standardizedFileURL.resolvingSymlinksInPath().path
+  }
+
   private func runAction(_ action: Action) {
+    lastAction = action
+    if let actionRunner {
+      actionRunner(action)
+      return
+    }
+
     switch action.type {
     case .application:
+      if Defaults[.hideFrontmostApplication],
+        let frontmost = NSWorkspace.shared.frontmostApplication,
+        Controller.isSameApplication(frontmost.bundleURL, action.value)
+      {
+        frontmost.hide()
+        break
+      }
       NSWorkspace.shared.openApplication(
         at: URL(fileURLWithPath: action.value),
         configuration: NSWorkspace.OpenConfiguration())

@@ -117,7 +117,7 @@ enum TopEdge {
     }
 
     override func windowDidResignKey(_ notification: Notification) {
-      if !dismissing { controller.hide() }
+      if !dismissing { controller.windowDidResignKey() }
     }
 
     override func notFound() {

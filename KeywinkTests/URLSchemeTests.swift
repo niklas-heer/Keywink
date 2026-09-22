@@ -32,6 +32,11 @@ final class URLSchemeTests: XCTestCase {
     XCTAssertEqual(action, .hide)
   }
 
+  func testRepeatURL() {
+    let url = URL(string: "keywink://repeat")!
+    XCTAssertEqual(URLSchemeHandler.parse(url), .repeatLastAction)
+  }
+
   func testResetURL() {
     let url = URL(string: "keywink://reset")!
     let action = URLSchemeHandler.parse(url)

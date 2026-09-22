@@ -3,6 +3,7 @@ import KeyboardShortcuts
 
 extension KeyboardShortcuts.Name {
   static let activate = Self("navigate")
+  static let repeatLastAction = Self("repeatLastAction")
 }
 
 // MARK: - Three-Way Key Mapping System

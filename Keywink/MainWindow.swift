@@ -40,7 +40,7 @@ class MainWindow: PanelWindow, NSWindowDelegate {
   }
 
   func windowDidResignKey(_ notification: Notification) {
-    controller.hide()
+    controller.windowDidResignKey()
   }
 
   override func performKeyEquivalent(with event: NSEvent) -> Bool {

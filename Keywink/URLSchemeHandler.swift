@@ -8,6 +8,7 @@ enum URLSchemeAction: Equatable {
   case activate
   case hide
   case reset
+  case repeatLastAction
   case navigate(keys: [String], execute: Bool)
   case show  // Fallback for unknown hosts
   case invalid  // Invalid scheme
@@ -34,6 +35,8 @@ class URLSchemeHandler {
       return .hide
     case "reset":
       return .reset
+    case "repeat":
+      return .repeatLastAction
     case "navigate":
       guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
         let queryItems = components.queryItems,

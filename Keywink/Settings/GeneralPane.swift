@@ -86,11 +86,23 @@ struct GeneralPane: View {
         }
       }
 
-      Settings.Section(title: "Shortcut") {
-        KeyboardShortcuts.Recorder(
-          shortcut: Binding(
-            get: { GlobalShortcuts.shortcut(for: .activate) },
-            set: { GlobalShortcuts.set($0, for: .activate) }))
+      Settings.Section(title: "Shortcuts", verticalAlignment: .top) {
+        Grid(alignment: .leading, verticalSpacing: 8) {
+          GridRow {
+            Text("Activate")
+            KeyboardShortcuts.Recorder(
+              shortcut: Binding(
+                get: { GlobalShortcuts.shortcut(for: .activate) },
+                set: { GlobalShortcuts.set($0, for: .activate) }))
+          }
+          GridRow {
+            Text("Repeat last action")
+            KeyboardShortcuts.Recorder(
+              shortcut: Binding(
+                get: { GlobalShortcuts.shortcut(for: .repeatLastAction) },
+                set: { GlobalShortcuts.set($0, for: .repeatLastAction) }))
+          }
+        }
       }
 
       Settings.Section(title: "Theme") {

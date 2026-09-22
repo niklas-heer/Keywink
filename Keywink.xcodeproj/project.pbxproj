@@ -21,6 +21,7 @@
 		42454DDB2D71CB39004E1374 /* ConfigValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42454DDA2D71CB39004E1374 /* ConfigValidator.swift */; };
 		42454DDD2D71CBAB004E1374 /* ConfigValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */; };
 		EC5CEBC4C47B4C5DB2258813 /* URLSchemeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */; };
+		A0B1C2D3E4F5061728394A07 /* ControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A08 /* ControllerTests.swift */; };
 		A0B1C2D3E4F5061728394A05 /* SettingsPaneSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A06 /* SettingsPaneSnapshotTests.swift */; };
 		A0B1C2D3E4F5061728394A03 /* GlobalShortcutsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B1C2D3E4F5061728394A04 /* GlobalShortcutsTests.swift */; };
 		425495402D75EFAD0020300E /* ForTheHorde.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4254953F2D75EFAD0020300E /* ForTheHorde.swift */; };
@@ -90,6 +91,7 @@
 		42454DDA2D71CB39004E1374 /* ConfigValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigValidator.swift; sourceTree = "<group>"; };
 		42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfigValidatorTests.swift; sourceTree = "<group>"; };
 		EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSchemeTests.swift; sourceTree = "<group>"; };
+		A0B1C2D3E4F5061728394A08 /* ControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerTests.swift; sourceTree = "<group>"; };
 		A0B1C2D3E4F5061728394A06 /* SettingsPaneSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPaneSnapshotTests.swift; sourceTree = "<group>"; };
 		A0B1C2D3E4F5061728394A04 /* GlobalShortcutsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalShortcutsTests.swift; sourceTree = "<group>"; };
 		4254953F2D75EFAD0020300E /* ForTheHorde.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ForTheHorde.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 				4284834B2E813212009D7EEF /* KeyboardLayoutTests.swift */,
 				42454DDC2D71CBAB004E1374 /* ConfigValidatorTests.swift */,
 				EC5CEBC4C47B4C5DB2258814 /* URLSchemeTests.swift */,
+				A0B1C2D3E4F5061728394A08 /* ControllerTests.swift */,
 				A0B1C2D3E4F5061728394A06 /* SettingsPaneSnapshotTests.swift */,
 				A0B1C2D3E4F5061728394A04 /* GlobalShortcutsTests.swift */,
 				427C17FC2BD311B500955B98 /* UserConfigTests.swift */,
@@ -456,6 +459,7 @@
 				A01A01A01A01A01A01A01003 /* TopEdgeTests.swift in Sources */,
 				42454DDD2D71CBAB004E1374 /* ConfigValidatorTests.swift in Sources */,
 				EC5CEBC4C47B4C5DB2258813 /* URLSchemeTests.swift in Sources */,
+				A0B1C2D3E4F5061728394A07 /* ControllerTests.swift in Sources */,
 				A0B1C2D3E4F5061728394A05 /* SettingsPaneSnapshotTests.swift in Sources */,
 				A0B1C2D3E4F5061728394A03 /* GlobalShortcutsTests.swift in Sources */,
 				427C17FD2BD311B500955B98 /* UserConfigTests.swift in Sources */,

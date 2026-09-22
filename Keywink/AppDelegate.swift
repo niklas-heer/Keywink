@@ -142,6 +142,9 @@ class AppDelegate: NSObject, NSApplicationDelegate,
     KeyboardShortcuts.onKeyDown(for: .activate) {
       self.activate()
     }
+    KeyboardShortcuts.onKeyDown(for: .repeatLastAction) {
+      self.controller.repeatLastAction()
+    }
 
     let groupKeys = GlobalShortcuts.activeGroupKeys(
       in: config.root, stored: Defaults[.groupShortcuts])
@@ -287,6 +290,8 @@ class AppDelegate: NSObject, NSApplicationDelegate,
       hide()
     case .reset:
       state.clear()
+    case .repeatLastAction:
+      controller.repeatLastAction()
     case .navigate(let keys, let execute):
       show()
       processKeys(keys, execute: execute)

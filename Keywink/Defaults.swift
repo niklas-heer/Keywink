@@ -69,6 +69,9 @@ extension Defaults.Keys {
   static let screen = Key<Screen>(
     "screen", default: .primary, suite: defaultsSuite)
 
+  static let hideFrontmostApplication = Key<Bool>(
+    "hideFrontmostApplication", default: false, suite: defaultsSuite)
+
   static let groupShortcuts = Key<Set<String>>(
     "groupShortcuts",
     default: Set(), suite: defaultsSuite)
