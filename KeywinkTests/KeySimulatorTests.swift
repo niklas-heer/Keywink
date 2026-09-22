@@ -82,9 +82,11 @@ final class KeySimulatorTests: XCTestCase {
         .action(Action(key: "t", type: .text, label: "Sign-off", value: "Best,\nNiklas")),
         .action(Action(key: "s", type: .shortcut, value: "cmd+shift+4")),
       ])
-    let data = try JSONEncoder().encode(root)
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.sortedKeys]
+    let data = try encoder.encode(root)
     let decoded = try JSONDecoder().decode(Group.self, from: data)
-    XCTAssertEqual(try JSONEncoder().encode(decoded), data)
+    XCTAssertEqual(try encoder.encode(decoded), data)
     guard case .action(let text) = decoded.actions[0],
       case .action(let shortcut) = decoded.actions[1]
     else { return XCTFail("expected two actions") }
