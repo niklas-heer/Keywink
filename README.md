@@ -24,13 +24,7 @@ Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderK
 
 Download the latest `Keywink-<version>.zip` from [Releases](https://github.com/niklas-heer/Keywink/releases), unzip it, and move `Keywink.app` to Applications. Keywink runs as a menu bar item.
 
-> **Early releases are ad-hoc signed, not notarized.** macOS will say it cannot verify the app on first launch. Open it once, then choose **System Settings → Privacy & Security → Open Anyway**. Alternatively, clear the quarantine flag before launching:
->
-> ```sh
-> xattr -d com.apple.quarantine /Applications/Keywink.app
-> ```
->
-> Notarized builds will replace this as soon as Developer ID signing is set up. Verify downloads against the `.sha256` file attached to each release.
+Releases are signed with a Developer ID certificate and notarized by Apple, so the app opens without extra steps. Verify downloads against the `.sha256` file attached to each release.
 
 Keywink requires macOS 13 Ventura or later and runs natively on Apple Silicon and Intel. There is no Homebrew cask yet.
 
