@@ -414,6 +414,70 @@ final class UserConfigTests: XCTestCase {
     XCTAssertEqual(subject.root.actions.count, 1)
   }
 
+  func testLoadsKdlConfigAndConvertsBackToJson() throws {
+    configDirectoryStore.path = testDefaultDir
+    try FileManager.default.createDirectory(
+      atPath: testDefaultDir, withIntermediateDirectories: true)
+    try """
+    group "o" label="Open" {
+        url "g" "https://example.com"
+    }
+    """.write(
+      toFile: (testDefaultDir as NSString).appendingPathComponent("config.kdl"), atomically: true,
+      encoding: .utf8)
+
+    subject.ensureAndLoad()
+
+    XCTAssertEqual(subject.format, .kdl)
+    XCTAssertEqual(subject.root.actions.count, 1)
+    XCTAssertEqual(testAlertManager.shownAlerts.count, 0)
+    let original = subject.root
+
+    subject.root = Group(
+      key: nil, actions: [.action(Action(key: "x", type: .command, value: "echo saved"))])
+    waitForAsyncIO()
+    let saved = try String(contentsOf: subject.url, encoding: .utf8)
+    XCTAssertTrue(saved.contains("command \"x\" \"echo saved\""), saved)
+
+    subject.root = original
+    waitForAsyncIO()
+    let backup = try XCTUnwrap(subject.convert(to: .json))
+    XCTAssertTrue(backup.lastPathComponent.hasPrefix("config.kdl.backup-"))
+    XCTAssertEqual(subject.format, .json)
+    try assertSamePersistedConfig(
+      try JSONDecoder().decode(Group.self, from: Data(contentsOf: subject.url)), original)
+  }
+
+  func testImportsTomlAndKdlSourcesIntoTheCurrentFormat() throws {
+    subject.ensureAndLoad()
+    XCTAssertEqual(subject.format, .json)
+
+    let kdlSource = URL(fileURLWithPath: tempBaseDir).appendingPathComponent("other.kdl")
+    try "url \"k\" \"https://example.com/kdl\"\n".write(
+      to: kdlSource, atomically: true, encoding: .utf8)
+    try subject.importConfig(from: kdlSource)
+    XCTAssertEqual(subject.url.lastPathComponent, "config.json")
+    XCTAssertTrue(
+      try String(contentsOf: subject.url, encoding: .utf8).contains("https://example.com/kdl"))
+
+    let tomlSource = URL(fileURLWithPath: tempBaseDir).appendingPathComponent("other.toml")
+    try """
+    type = "group"
+    [[actions]]
+    key = "t"
+    type = "url"
+    value = "https://example.com/toml"
+    """.write(to: tomlSource, atomically: true, encoding: .utf8)
+    try subject.importConfig(from: tomlSource)
+    XCTAssertTrue(
+      try String(contentsOf: subject.url, encoding: .utf8).contains("https://example.com/toml"))
+    XCTAssertEqual(subject.root.actions.count, 1)
+
+    let unsupported = URL(fileURLWithPath: tempBaseDir).appendingPathComponent("other.yaml")
+    try "actions: []".write(to: unsupported, atomically: true, encoding: .utf8)
+    XCTAssertThrowsError(try subject.importConfig(from: unsupported))
+  }
+
   func testRuntimeEnvironmentDetectsEveryXCTestMarker() {
     XCTAssertTrue(
       RuntimeEnvironment.isRunningTests(

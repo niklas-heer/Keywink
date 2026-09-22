@@ -9,15 +9,23 @@ import TOMLKit
 enum ConfigFormat: String, CaseIterable, Identifiable {
   case json
   case toml
+  case kdl
 
   var id: Self { self }
   var fileName: String { "config.\(rawValue)" }
   var displayName: String { rawValue.uppercased() }
 
-  /// TOML wins when both files exist, because converting leaves only a backup behind.
+  init?(fileExtension: String) {
+    self.init(rawValue: fileExtension.lowercased())
+  }
+
+  /// The first non-JSON file wins when several exist; converting leaves only a backup behind.
   static func detect(in directory: String, fileManager: FileManager = .default) -> ConfigFormat {
-    let tomlPath = (directory as NSString).appendingPathComponent(ConfigFormat.toml.fileName)
-    return fileManager.fileExists(atPath: tomlPath) ? .toml : .json
+    for format in [ConfigFormat.toml, .kdl] {
+      let path = (directory as NSString).appendingPathComponent(format.fileName)
+      if fileManager.fileExists(atPath: path) { return format }
+    }
+    return .json
   }
 }
 
@@ -25,12 +33,18 @@ let emptyRoot = Group(key: "🚫", label: "Config error", actions: [])
 
 enum ConfigImportError: LocalizedError {
   case sourceMatchesDestination
+  case unsupportedFormat(String)
+  case notText
   case validationFailed([ValidationError])
 
   var errorDescription: String? {
     switch self {
     case .sourceMatchesDestination:
-      return "Choose a config file other than Keywink's current config.json."
+      return "Choose a config file other than Keywink's current configuration file."
+    case .unsupportedFormat(let ext):
+      return "Cannot import '.\(ext)' files. Choose a JSON, TOML, or KDL configuration."
+    case .notText:
+      return "The selected file is not UTF-8 text."
     case .validationFailed(let errors):
       let details = errors.prefix(3).map(\.message).joined(separator: "\n")
       return "The selected config contains invalid shortcuts.\n\(details)"
@@ -128,14 +142,20 @@ class UserConfig: ObservableObject {
       throw ConfigImportError.sourceMatchesDestination
     }
 
+    guard let sourceFormat = ConfigFormat(fileExtension: sourceURL.pathExtension) else {
+      throw ConfigImportError.unsupportedFormat(sourceURL.pathExtension)
+    }
     let sourceData = try Data(contentsOf: sourceURL)
-    let importedRoot = try JSONDecoder().decode(Group.self, from: sourceData)
+    guard let sourceText = String(data: sourceData, encoding: .utf8) else {
+      throw ConfigImportError.notText
+    }
+    let importedRoot = try Self.decode(sourceText, as: sourceFormat)
     let errors = ConfigValidator.validate(group: importedRoot)
     guard errors.isEmpty else {
       throw ConfigImportError.validationFailed(errors)
     }
-    // A JSON destination receives the file byte for byte; TOML needs re-encoding.
-    let data = format == .json ? sourceData : try Self.encode(importedRoot, as: format)
+    // Same format: keep the file byte for byte. Otherwise re-encode for the current format.
+    let data = sourceFormat == format ? sourceData : try Self.encode(importedRoot, as: format)
 
     invalidatePendingIO()
     Events.send(.willReload)
@@ -413,6 +433,8 @@ class UserConfig: ObservableObject {
     case .toml:
       let table: TOMLTable = try TOMLEncoder().encode(root)
       return Data(table.convert(to: .toml).utf8)
+    case .kdl:
+      return Data(KDLConfig.encode(root).utf8)
     }
   }
 
@@ -427,6 +449,8 @@ class UserConfig: ObservableObject {
       return try JSONDecoder().decode(Group.self, from: data)
     case .toml:
       return try TOMLDecoder().decode(Group.self, from: text)
+    case .kdl:
+      return try KDLConfig.decode(text)
     }
   }
 
@@ -605,7 +629,7 @@ let defaultConfig = """
   }
   """
 
-enum Type: String, Codable {
+enum Type: String, Codable, CaseIterable {
   case group
   case application
   case url

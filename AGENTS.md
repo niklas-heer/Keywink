@@ -41,11 +41,11 @@ Keywink is a macOS application that provides customizable keyboard shortcuts. Th
 
 **Configuration Flow:**
 
-- Config stored at `~/Library/Application Support/Keywink/config.json`, or `config.toml` when that file exists (`ConfigFormat.detect`); both encode the same `Group` model and Settings → Advanced converts between them, keeping a backup
+- Config stored at `~/Library/Application Support/Keywink/config.json`, or `config.toml`/`config.kdl` when one of those exists (`ConfigFormat.detect`); all formats encode the same `Group` model and Settings → Advanced converts between them, keeping a backup. TOML uses Codable via TOMLKit; KDL uses the in-house reader/writer in `KDL.swift` and the node mapping in `KDLConfig.swift`
 - Configuration changes save automatically; explicit reload and the settings import flow update the in-memory configuration
 - `ConfigValidator` ensures no key conflicts
 - Actions support: applications, URLs, commands, folders, typed text, and key shortcuts. Text and shortcut actions post keyboard events through `KeySimulator` and need the Accessibility permission; they always close the guide first
-- Leader Key JSON import is explicit, validates before replacing, and preserves both the source and a backup of the Keywink configuration. Do not silently share upstream preferences or configuration.
+- Import is explicit, accepts JSON, TOML, or KDL (Leader Key's config.json included), validates before replacing, re-encodes into the active format, and preserves both the source and a backup of the Keywink configuration. Do not silently share upstream preferences or configuration.
 - Sparkle starts only with a configured HTTPS feed and valid public key; never restore upstream update infrastructure.
 
 **Testing Architecture:**

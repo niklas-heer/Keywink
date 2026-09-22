@@ -81,7 +81,9 @@ Counts follow key paths, so reassigning a key inherits that path's history until
 
 Keywink stores its configuration as `config.json` under `~/Library/Application Support/Keywink/` (change the directory under **Settings → Advanced**). The editor writes the file on every change; edit it by hand and choose **Read from file** or `keywink://config-reload` to pick up external changes.
 
-Prefer comments and less punctuation? Switch **Settings → Advanced → Format** to TOML. Keywink rewrites the configuration as `config.toml`, keeps the JSON file as a backup, and uses TOML from then on. The fields are the same in both formats:
+Prefer comments and less punctuation? Switch **Settings → Advanced → Format** to TOML or KDL. Keywink rewrites the configuration as `config.toml` or `config.kdl`, keeps the previous file as a backup, and uses the new file from then on. Switch back the same way.
+
+TOML keeps the JSON structure with the same field names:
 
 ```toml
 type = "group"
@@ -103,11 +105,22 @@ label = "Email"
 value = "hello@example.com"
 ```
 
-## Import from Leader Key
+[KDL](https://kdl.dev) is the most compact: one node per item, where the node name is the action type, the first value the key, the second the target, and `label=` and `icon=` are optional. Groups nest their items in braces. Comments, `/-` to disable a node, raw strings (`#"..."#`), and multi-line strings all work.
 
-Choose **Settings → General → Import Leader Key config…** and select the existing `config.json`, normally under `~/Library/Application Support/Leader Key/`. Keywink validates the file, backs up its current configuration, and copies the selection into its own directory. The original is left untouched.
+```kdl
+group "o" label="Open" {
+    application "s" "/Applications/Safari.app"
+    url "g" "https://google.com" label="Google"
+    shortcut "4" "cmd+shift+4" label="Screenshot"
+}
+text "e" "hello@example.com" label="Email" icon="~/icons/mail.png"
+```
 
-Only the JSON configuration is imported. Record your activation shortcut and preferences in Keywink, and update any `leaderkey://` automation URLs to `keywink://`. Do not give both apps the same global shortcut.
+## Import a configuration
+
+Choose **Settings → General → Import configuration…** and select a JSON, TOML, or KDL file. Keywink validates it, backs up its current configuration, and writes the import in whichever format is active, so a KDL file can replace a JSON configuration and the other way round. The original is left untouched.
+
+This is also how you move from Leader Key: its `config.json` lives under `~/Library/Application Support/Leader Key/`, and the panel opens there when that folder exists. Only the configuration is imported. Record your activation shortcut and preferences in Keywink, and update any `leaderkey://` automation URLs to `keywink://`. Do not give both apps the same global shortcut.
 
 ## Automation
 
@@ -140,7 +153,7 @@ Keywink started as a fork of [Leader Key](https://github.com/mikker/LeaderKey), 
 | [#96](https://github.com/mikker/LeaderKey/issues/96), [#189](https://github.com/mikker/LeaderKey/issues/189) | Optional toggle behaviour: an application action hides the app when it is already in front. |
 | [#322](https://github.com/mikker/LeaderKey/issues/322), [#316](https://github.com/mikker/LeaderKey/issues/316) | **Text** and **Shortcut** actions type into, or press a key combination in, the app you came from. |
 | [PR #300](https://github.com/mikker/LeaderKey/pull/300) | Image files as icons for actions and groups. |
-| [#68](https://github.com/mikker/LeaderKey/issues/68), [PR #303](https://github.com/mikker/LeaderKey/pull/303) | Optional TOML configuration with the same fields as JSON. |
+| [#68](https://github.com/mikker/LeaderKey/issues/68), [PR #303](https://github.com/mikker/LeaderKey/pull/303) | Optional TOML or KDL configuration, converted from Settings, plus import from any of the three formats. |
 | [#262](https://github.com/mikker/LeaderKey/issues/262), [#259](https://github.com/mikker/LeaderKey/issues/259), [#204](https://github.com/mikker/LeaderKey/issues/204), [#185](https://github.com/mikker/LeaderKey/issues/185) | Already handled by Keywink's rewritten editor and settings: uppercase keys, groups that stay expanded while editing, sorting, and showing the guide on the screen with the mouse. |
 
 Keywink is not affiliated with Leader Key. Leader Key configurations can be imported (see above); nothing is shared automatically.

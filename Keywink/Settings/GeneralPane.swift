@@ -119,9 +119,9 @@ struct GeneralPane: View {
 
       Settings.Section(title: "Import", verticalAlignment: .top) {
         VStack(alignment: .leading, spacing: 4) {
-          Button("Import Leader Key config…", action: importLeaderKeyConfig)
+          Button("Import configuration…", action: importConfiguration)
           Text(
-            "Validates a Leader Key config.json and copies it into Keywink. Your current configuration is backed up first."
+            "Reads a Keywink or Leader Key configuration in JSON, TOML, or KDL, validates it, and converts it to the current format. Your current configuration is backed up first."
           )
           .font(.caption)
           .foregroundColor(.secondary)
@@ -131,21 +131,28 @@ struct GeneralPane: View {
     }
   }
 
-  private func importLeaderKeyConfig() {
+  private func importConfiguration() {
     let panel = NSOpenPanel()
-    panel.title = "Import Leader Key configuration"
-    panel.allowedContentTypes = [.json]
+    panel.title = "Import configuration"
+    panel.allowedContentTypes =
+      [.json]
+      + ["toml", "kdl"].compactMap {
+        UTType(filenameExtension: $0, conformingTo: .text)
+      }
     panel.allowsMultipleSelection = false
     panel.canChooseDirectories = false
-    panel.directoryURL = FileManager.default.urls(
+    let leaderKeyDirectory = FileManager.default.urls(
       for: .applicationSupportDirectory, in: .userDomainMask
     ).first?.appendingPathComponent("Leader Key", isDirectory: true)
+    if let leaderKeyDirectory, FileManager.default.fileExists(atPath: leaderKeyDirectory.path) {
+      panel.directoryURL = leaderKeyDirectory
+    }
     guard panel.runModal() == .OK, let source = panel.url else { return }
 
     let confirmation = NSAlert()
     confirmation.messageText = "Replace Keywink's configuration?"
     confirmation.informativeText =
-      "The selected configuration will be copied to Keywink. Your current configuration will be backed up beside config.json. The original file will remain unchanged. Shortcuts and app preferences are not imported."
+      "The selected configuration will be validated and written to Keywink in the current format (\(config.format.displayName)). Your current configuration will be backed up beside it. The original file will remain unchanged. Shortcuts and app preferences are not imported."
     confirmation.addButton(withTitle: "Import")
     confirmation.addButton(withTitle: "Cancel")
     guard confirmation.runModal() == .alertFirstButtonReturn else { return }
