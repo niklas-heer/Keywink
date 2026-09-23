@@ -96,9 +96,28 @@ if [[ -e $artifact || -e $artifact.sha256 ]]; then
 fi
 
 ditto -c -k --sequesterRsrc --keepParent "$app_path" "$artifact"
-shasum -a 256 "$artifact" > "$artifact.sha256"
+(cd "$artifact_dir" && shasum -a 256 "$(basename "$artifact")" > "$(basename "$artifact").sha256")
+
+# Sparkle appcast with this release only: every installed version updates straight to it.
+sparkle_tools=$(find "$repo_root/build/SourcePackages/artifacts/sparkle/Sparkle/bin" \
+  "$HOME/Library/Developer/Xcode/DerivedData" -maxdepth 8 -type f -name generate_appcast 2>/dev/null | head -1)
+if [[ -z $sparkle_tools ]]; then
+  echo "Sparkle's generate_appcast was not found; run mise run build first." >&2
+  exit 69
+fi
+sparkle_tools=$(dirname "$sparkle_tools")
+sparkle_account=${KEYWINK_SPARKLE_ACCOUNT:-ed25519}
+mkdir -p "$temporary_dir/appcast"
+cp "$artifact" "$temporary_dir/appcast/"
+"$sparkle_tools/generate_appcast" --account "$sparkle_account" \
+  --download-url-prefix "https://github.com/niklas-heer/Keywink/releases/download/v$version/" \
+  --link "https://github.com/niklas-heer/Keywink/releases/tag/v$version" \
+  -o "$artifact_dir/appcast.xml" "$temporary_dir/appcast"
+"$sparkle_tools/sign_update" --account "$sparkle_account" --verify "$artifact" \
+  "$(sed -n 's/.*sparkle:edSignature="\([^"]*\)".*/\1/p' "$artifact_dir/appcast.xml" | head -1)"
 
 echo "Prepared notarized GitHub release artifacts:"
 echo "  $artifact"
 echo "  $artifact.sha256"
-echo "Publishing a GitHub release and updating a Sparkle feed are separate manual steps."
+echo "  $artifact_dir/appcast.xml"
+echo "Publish all three as release assets; installed apps read the newest release's appcast.xml."

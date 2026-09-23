@@ -38,12 +38,7 @@ The Xcode project, scheme, and targets are named `Keywink`. The shipped product 
    export KEYWINK_SIGNING_IDENTITY="Developer ID Application: Your Name (YOUR_TEAM_ID)"
    ```
 
-   Leave `KEYWINK_UPDATE_FEED_URL` and `KEYWINK_UPDATE_PUBLIC_KEY` unset to build with updates disabled. After the independent Sparkle feed is ready, export both values before creating the archive; `bin/archive` forwards them explicitly to Xcode:
-
-   ```sh
-   export KEYWINK_UPDATE_FEED_URL="https://example.com/keywink/appcast.xml"
-   export KEYWINK_UPDATE_PUBLIC_KEY="BASE64_ED25519_PUBLIC_KEY"
-   ```
+   Release builds enable Sparkle by default with the feed `https://github.com/niklas-heer/Keywink/releases/latest/download/appcast.xml` and the published Ed25519 public key; `bin/archive` forwards both to Xcode. Set `KEYWINK_UPDATE_FEED_URL=""` and `KEYWINK_UPDATE_PUBLIC_KEY=""` to build with updates disabled, or point them at another feed and key pair.
 
 3. Prepare the signed and notarized artifact:
 
@@ -56,13 +51,16 @@ The Xcode project, scheme, and targets are named `Keywink`. The shipped product 
    ```text
    build/release/artifacts/Keywink-<version>-<build>.zip
    build/release/artifacts/Keywink-<version>-<build>.zip.sha256
+   build/release/artifacts/appcast.xml
    ```
+
+   The appcast lists this release only and is signed with the Sparkle key from the login Keychain (account `ed25519`, override with `KEYWINK_SPARKLE_ACCOUNT`). Installed apps follow the `latest/download` redirect, so each release replaces the feed and every older version updates straight to the newest one.
 
    The command stops if an archive or final artifact already exists. This avoids silently publishing a stale build. Move or remove the generated `build/release` directory before deliberately preparing the same version again.
 
    `mise run archive` is available when you only want to inspect a signed archive. It writes the same default archive path, so move or remove that standalone archive before running `mise run release`; the release task always creates a fresh archive and refuses to reuse an existing one.
 
-4. Tag the released commit, push the tag, and create a GitHub release with the ZIP, checksum, and release notes. This is a deliberate manual step; the local task does not create a tag, commit, push, or publish a release.
+4. Tag the released commit, push the tag, and create a GitHub release with the ZIP, checksum, appcast, and release notes. This is a deliberate manual step; the local task does not create a tag, commit, push, or publish a release. The appcast must be attached, or installed apps stop seeing updates.
 
    ```sh
    git tag -a v0.1.0 -m "Keywink 0.1.0"
@@ -70,6 +68,7 @@ The Xcode project, scheme, and targets are named `Keywink`. The shipped product 
    gh release create v0.1.0 \
      build/release/artifacts/Keywink-0.1.0-1.zip \
      build/release/artifacts/Keywink-0.1.0-1.zip.sha256 \
+     build/release/artifacts/appcast.xml \
      --title "Keywink 0.1.0" \
      --notes-file build/release/notes-0.1.0.md
    ```
@@ -95,13 +94,10 @@ State this clearly in the release notes. Replace ad-hoc artifacts with notarized
 
 ## Sparkle updates
 
-The app updater remains disabled until both `KEYWINK_UPDATE_FEED_URL` and `KEYWINK_UPDATE_PUBLIC_KEY` are configured at build time. The feed URL must use HTTPS, and the public key must be the valid base64-encoded 32-byte Ed25519 key generated for Keywink.
+Releases since 0.2.1 check `https://github.com/niklas-heer/Keywink/releases/latest/download/appcast.xml` and verify updates with the Ed25519 public key baked into the build. Keeping updates working requires:
 
-Before enabling updates:
+- The Sparkle private key in the login Keychain of the release machine (`generate_keys`, account `ed25519`). One key signs updates for every app released from this machine. Keep an exported copy (`generate_keys -x <file>`) in a password manager, never in a repository. Losing the key means installed copies cannot verify any further update.
+- Every GitHub release carrying a fresh `appcast.xml` asset. `bin/release` generates and verifies it.
+- A `CFBundleVersion` higher than the previous release; `bin/bump` sets it.
 
-1. Generate and securely retain a Keywink-specific Sparkle private key. Never commit it.
-2. Choose a stable HTTPS location for the Keywink appcast. GitHub Pages or another static host can serve it independently of the GitHub release assets.
-3. Use the Sparkle tools from the version resolved by Swift Package Manager to sign the release ZIP and generate the appcast. Do not restore the removed inherited binaries.
-4. Configure the two build settings for release builds, verify a signed update from an older Keywink version, and document the feed's publishing and key-recovery process.
-
-GitHub Releases are the intended artifact store. Sparkle's feed is separate metadata that points to those immutable release assets; enabling it does not require restoring the upstream S3 automation.
+Ad-hoc builds (`bin/release-adhoc`) and unconfigured local builds keep the updater disabled and show **Keywink Releases…** instead of **Check for Updates…**. The Sparkle tools come from the Swift Package Manager artifact of the resolved Sparkle version; the removed upstream binaries stay removed.

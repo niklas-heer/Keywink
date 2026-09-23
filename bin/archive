@@ -6,8 +6,9 @@ cd "$repo_root"
 
 archive_path=${1:-build/release/Keywink.xcarchive}
 signing_identity=${KEYWINK_SIGNING_IDENTITY:-Developer ID Application}
-update_feed_url=${KEYWINK_UPDATE_FEED_URL:-}
-update_public_key=${KEYWINK_UPDATE_PUBLIC_KEY:-}
+# Updates come from the newest GitHub release's appcast asset; the public key is safe to publish.
+update_feed_url=${KEYWINK_UPDATE_FEED_URL-https://github.com/niklas-heer/Keywink/releases/latest/download/appcast.xml}
+update_public_key=${KEYWINK_UPDATE_PUBLIC_KEY-SL638YLPjJQuUkrCa0p26d1nfMoa69+ymt0mzNQDscA=}
 
 if [[ -z ${KEYWINK_DEVELOPMENT_TEAM:-} ]]; then
   echo "KEYWINK_DEVELOPMENT_TEAM is required (the Apple Developer Team ID)." >&2

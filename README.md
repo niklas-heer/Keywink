@@ -30,7 +30,7 @@ Keywink is an independent fork of [Leader Key](https://github.com/mikker/LeaderK
 
 Download the latest `Keywink-<version>.zip` from [Releases](https://github.com/niklas-heer/Keywink/releases), unzip it, and move `Keywink.app` to Applications. Keywink runs as a menu bar item.
 
-Releases are signed with a Developer ID certificate and notarized by Apple, so the app opens without extra steps. Verify downloads against the `.sha256` file attached to each release.
+Releases are signed with a Developer ID certificate and notarized by Apple, so the app opens without extra steps. Verify downloads against the `.sha256` file attached to each release. Keywink checks GitHub Releases for updates and offers to install them; **Check for Updates…** in the menu bar runs the check right away.
 
 Keywink requires macOS 13 Ventura or later and runs natively on Apple Silicon and Intel. There is no Homebrew cask yet.
 
