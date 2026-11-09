@@ -99,8 +99,7 @@ final class TopEdgeTests: XCTestCase {
     } else {
       NSApp.activate(ignoringOtherApps: true)
     }
-    settle()
-    let window = try XCTUnwrap(controller.window as? TopEdge.Window)
+    let window = try waitForTopEdgeWindow(of: controller)
     defer { window.orderOut(nil) }
     let shown = expectation(description: "panel shown")
     window.show(on: screen) { shown.fulfill() }
@@ -305,6 +304,21 @@ final class TopEdgeTests: XCTestCase {
     XCTAssertEqual(browser.openings, 2)
     XCTAssertEqual(browser.groupViews, 2)
     XCTAssertEqual(browser.actionUses, 0)
+  }
+
+  /// The controller builds its theme window in a detached task that finishes whenever the main
+  /// actor is free; poll for it instead of assuming a fixed delay is long enough on a busy runner.
+  private func waitForTopEdgeWindow(of controller: Controller, timeout: TimeInterval = 30) throws
+    -> TopEdge.Window
+  {
+    let deadline = Date().addingTimeInterval(timeout)
+    while Date() < deadline {
+      if let window = controller.window as? TopEdge.Window { return window }
+      let step = expectation(description: "theme window created")
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { step.fulfill() }
+      wait(for: [step], timeout: timeout)
+    }
+    return try XCTUnwrap(controller.window as? TopEdge.Window, "Key Guide window was not created")
   }
 
   private func settle() {
